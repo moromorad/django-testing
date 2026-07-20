@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My To-Do List</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; background: #f4f4f4; color: #333; }
+        .container { max-width: 500px; margin: auto; }
+        .add-form { display: flex; gap: 10px; margin-bottom: 20px; }
+        .add-form input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        .add-form button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .task-card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .completed { text-decoration: line-through; color: gray; }
+        .delete-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .weather-panel { background: #e0f7fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center; color: #00796b; font-weight: bold; border: 1px solid #b2ebf2; }
+        .weather-panel span { font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Live To-Do Interface</h1>
+        
+        <div class="weather-panel">
+            {% if weather %}
+                <span>
+                    ⛅ Current Weather: {{ weather.weather }} | 🌡️ {{ weather.temp }}°C
+                    {% if temp_diff %}
+                        <small style="margin-left: 5px;">
+                        {% if temp_diff > 0 %}
+                            <span style="color: #d32f2f;">(🔺 +{{ abs_diff|floatformat:1 }}°C)</span>
+                        {% elif temp_diff < 0 %}
+                            <span style="color: #1976d2;">(🔻 {{ abs_diff|floatformat:1 }}°C)</span>
+                        {% else %}
+                            <span style="color: #757575;">(➖ No change)</span>
+                        {% endif %}
+                        </small>
+                    {% endif %}
+                </span>
+                <div style="font-size: 0.8em; margin-top: 5px; font-weight: normal;">Updated: {{ weather.time|date:"g:i A, M j" }}</div>
+            {% else %}
+                <span>Weather data is not available yet. (Run the Celery task!)</span>
+            {% endif %}
+        </div>
+        
+        <form method="POST" class="add-form">
+            {% csrf_token %}
+            <input type="text" name="title" placeholder="What needs to be done?" required>
+            <button type="submit">Add Task</button>
+        </form>
+        
+        <div>
+            {% for task in tasks %}
+                <div class="task-card">
+                    <span class="{% if task.completed %}completed{% endif %}">
+                        <strong>{{ task.title }}</strong>
+                    </span>
+                    
+                    <form method="POST" action="{% url 'delete-task-ui' task.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-btn">Delete</button>
+                    </form>
+                </div>
+            {% empty %}
+                <p>No tasks left! Rest up. 😎</p>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
