@@ -42,28 +42,201 @@
             {% endif %}
         </div>
         
-        <form method="POST" class="add-form">
-            {% csrf_token %}
-            <input type="text" name="title" placeholder="What needs to be done?" required>
+    <div id="login-section" style="display: none;">
+        <h2>Login</h2>
+        <form id="login-form" class="add-form">
+            <input type="text" id="login-username" placeholder="Username" required>
+            <input type="password" id="login-password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p id="login-error" style="color: red; display: none;">Invalid credentials.</p>
+    </div>
+
+    <div id="app-section" style="display: none;">
+        <form id="add-task-form" class="add-form">
+            <input type="text" id="task-title" placeholder="What needs to be done?" required>
             <button type="submit">Add Task</button>
         </form>
         
-        <div>
-            {% for task in tasks %}
-                <div class="task-card">
-                    <span class="{% if task.completed %}completed{% endif %}">
-                        <strong>{{ task.title }}</strong>
-                    </span>
-                    
-                    <form method="POST" action="{% url 'delete-task-ui' task.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="delete-btn">Delete</button>
-                    </form>
-                </div>
-            {% empty %}
-                <p>No tasks left! Rest up. 😎</p>
-            {% endfor %}
+        <div id="task-list">
+            <p>Loading tasks...</p>
         </div>
+        <button id="logout-btn" style="margin-top: 20px;">Logout</button>
     </div>
+
+    <script>
+        const apiBaseUrl = '/api/tasks/';
+        const tokenUrl = '/api/token/';
+        
+        const loginSection = document.getElementById('login-section');
+        const appSection = document.getElementById('app-section');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        
+        const taskListEl = document.getElementById('task-list');
+        const formEl = document.getElementById('add-task-form');
+        const titleEl = document.getElementById('task-title');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Check if user is logged in
+        function checkAuth() {
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                loginSection.style.display = 'none';
+                appSection.style.display = 'block';
+                fetchTasks();
+            } else {
+                loginSection.style.display = 'block';
+                appSection.style.display = 'none';
+            }
+        }
+
+        // Handle Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch(tokenUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('access_token', data.access);
+                    localStorage.setItem('refresh_token', data.refresh);
+                    loginError.style.display = 'none';
+                    checkAuth();
+                } else if (response.status === 429) {
+                    const errorData = await response.json();
+                    loginError.textContent = errorData.detail;
+                    loginError.style.display = 'block';
+                } else {
+                    loginError.textContent = "Invalid credentials.";
+                    loginError.style.display = 'block';
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+                loginError.textContent = "An error occurred.";
+                loginError.style.display = 'block';
+            }
+        });
+
+        // Handle Logout
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            checkAuth();
+        });
+
+        // Utility to get headers with JWT token
+        function getAuthHeaders() {
+            const token = localStorage.getItem('access_token');
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+        }
+
+        // Fetch Tasks
+        async function fetchTasks() {
+            try {
+                const response = await fetch(apiBaseUrl, { headers: getAuthHeaders() });
+                
+                if (response.status === 401) {
+                    // Token expired or invalid
+                    logoutBtn.click();
+                    return;
+                }
+                
+                const tasks = await response.json();
+                renderTasks(tasks);
+            } catch (error) {
+                console.error("Error fetching tasks:", error);
+                taskListEl.innerHTML = '<p>Error loading tasks.</p>';
+            }
+        }
+
+        // Render Tasks
+        function renderTasks(tasks) {
+            if (tasks.length === 0) {
+                taskListEl.innerHTML = '<p>No tasks left! Rest up. 😎</p>';
+                return;
+            }
+            taskListEl.innerHTML = '';
+            tasks.forEach(task => {
+                const card = document.createElement('div');
+                card.className = 'task-card';
+                
+                const titleText = document.createTextNode(task.title);
+                const span = document.createElement('span');
+                if (task.completed) span.className = 'completed';
+                const strong = document.createElement('strong');
+                strong.appendChild(titleText);
+                span.appendChild(strong);
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = () => deleteTask(task.id);
+
+                card.appendChild(span);
+                card.appendChild(deleteBtn);
+                taskListEl.appendChild(card);
+            });
+        }
+
+        // Add Task
+        formEl.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = titleEl.value.trim();
+            if (!title) return;
+
+            try {
+                const response = await fetch(apiBaseUrl, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ title: title })
+                });
+
+                if (response.ok) {
+                    titleEl.value = '';
+                    fetchTasks();
+                } else if (response.status === 401) {
+                    logoutBtn.click();
+                } else {
+                    console.error("Failed to add task");
+                }
+            } catch (error) {
+                console.error("Error adding task:", error);
+            }
+        });
+
+        // Delete Task
+        async function deleteTask(id) {
+            try {
+                const response = await fetch(`${apiBaseUrl}${id}/`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+
+                if (response.ok || response.status === 204) {
+                    fetchTasks();
+                } else if (response.status === 401) {
+                    logoutBtn.click();
+                } else {
+                    console.error("Failed to delete task");
+                }
+            } catch (error) {
+                console.error("Error deleting task:", error);
+            }
+        }
+
+        // Init
+        checkAuth();
+    </script>
 </body>
 </html>

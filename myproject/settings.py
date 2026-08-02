@@ -39,8 +39,30 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'coresite',
     'rest_framework',
+    'rest_framework_simplejwt',
     'import_export',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+
+    #rate limiting
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle', 
+        'rest_framework.throttling.UserRateThrottle' 
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/minute',  
+        'user': '100/minute' 
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

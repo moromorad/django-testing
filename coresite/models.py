@@ -5,6 +5,7 @@ from django.db.models.signals import post_delete
 # pyrefly: ignore [missing-import]
 from django.dispatch import receiver
 
+
 # Create your models here.
 class Task(models.Model):
     # The actual text of the to-do item
@@ -16,10 +17,15 @@ class Task(models.Model):
     # Automatically saves the exact timestamp when a task is first created
     created_at = models.DateTimeField(auto_now_add=True)
 
+    owner = models.ForeignKey(
+    "auth.User", related_name="tasks", on_delete=models.CASCADE
+    )
+
     
     def __str__(self):
         # This just makes the task readable in the console (returns "Buy Milk" instead of "Task Object 1")
         return self.title
+    
     
 class Weather(models.Model):
     temp = models.FloatField()
