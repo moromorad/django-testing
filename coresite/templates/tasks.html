@@ -14,6 +14,7 @@
         .delete-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
         .weather-panel { background: #e0f7fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center; color: #00796b; font-weight: bold; border: 1px solid #b2ebf2; }
         .weather-panel span { font-size: 1.2em; }
+        .due-date-label { font-size: 0.8em; color: #888; margin-left: 10px; font-weight: normal; }
     </style>
 </head>
 <body>
@@ -162,6 +163,22 @@
             }
         }
 
+        // Format Time Left Helper
+        function formatTimeLeft(dueString) {
+            const diffMins = Math.floor((new Date(dueString) - new Date()) / 60000);
+            if (diffMins < 0) {
+                const absMins = Math.abs(diffMins);
+                if (absMins < 60) return `overdue by ${absMins}m`;
+                const absHours = Math.floor(absMins / 60);
+                if (absHours < 24) return `overdue by ${absHours}h`;
+                return `overdue by ${Math.floor(absHours / 24)}d`;
+            }
+            if (diffMins < 60) return `in ${diffMins}m`;
+            const hours = Math.floor(diffMins / 60);
+            if (hours < 24) return `in ${hours}h`;
+            return `in ${Math.floor(hours / 24)}d`;
+        }
+
         // Render Tasks
         function renderTasks(tasks) {
             if (tasks.length === 0) {
@@ -175,22 +192,44 @@
                 console.log("Rendering task:", task);
                 
                 const titleText = document.createTextNode(task.title);
-                const dateString = new Date(task.due_date).toLocaleString();
-                const dueDate = document.createTextNode(` (Due: ${dateString})`);
+                
+                const dateOptions = { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+                const dateString = new Date(task.due_date).toLocaleString(undefined, dateOptions);
+                const dueDateSpan = document.createElement('span');
+                dueDateSpan.className = 'due-date-label time-left-updater';
+                dueDateSpan.dataset.dueDate = task.due_date;
+                dueDateSpan.textContent = `due: ${dateString} (${formatTimeLeft(task.due_date)})`;
+                
                 const span = document.createElement('span');
                 if (task.completed) span.className = 'completed';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = task.completed;
+                checkbox.style.marginRight = '10px';
+                checkbox.onclick = () => toggleTask(task);
+                
                 const strong = document.createElement('strong');
                 strong.appendChild(titleText);
+                
+                span.appendChild(checkbox);
                 span.appendChild(strong);
 
-                span.appendChild(dueDate);
+                const rightContainer = document.createElement('div');
+                rightContainer.style.display = 'flex';
+                rightContainer.style.alignItems = 'center';
+                rightContainer.style.gap = '15px';
+
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-btn';
                 deleteBtn.textContent = 'Delete';
                 deleteBtn.onclick = () => deleteTask(task.id);
 
+                rightContainer.appendChild(dueDateSpan);
+                rightContainer.appendChild(deleteBtn);
+
                 card.appendChild(span);
-                card.appendChild(deleteBtn);
+                card.appendChild(rightContainer);
                 taskListEl.appendChild(card);
             });
         }
@@ -199,8 +238,11 @@
         formEl.addEventListener('submit', async (e) => {
             e.preventDefault();
             const title = titleEl.value.trim();
-            const dueDate = dueDateEl.value;
-            if (!title || !dueDate) return;
+            const dueDateRaw = dueDateEl.value;
+            if (!title || !dueDateRaw) return;
+
+            // Ensure the date is sent with exactly :00 seconds
+            const dueDate = dueDateRaw.substring(0, 16) + ':00';
 
             try {
                 const response = await fetch(apiBaseUrl, {
@@ -222,6 +264,26 @@
                 console.error("Error adding task:", error);
             }
         });
+        // Toggle Task Completion
+        async function toggleTask(task) {
+            try {
+                const response = await fetch(`${apiBaseUrl}${task.id}/`, {
+                    method: 'PATCH',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ completed: !task.completed })
+                });
+
+                if (response.ok) {
+                    fetchTasks();
+                } else if (response.status === 401) {
+                    logoutBtn.click();
+                } else {
+                    console.error("Failed to toggle task");
+                }
+            } catch (error) {
+                console.error("Error toggling task:", error);
+            }
+        }
 
         // Delete Task
         async function deleteTask(id) {
@@ -242,6 +304,18 @@
                 console.error("Error deleting task:", error);
             }
         }
+
+        // Auto-update time left every 60 seconds
+        setInterval(() => {
+            document.querySelectorAll('.time-left-updater').forEach(span => {
+                const due = span.dataset.dueDate;
+                if (due) {
+                    const dateOptions = { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+                    const dateString = new Date(due).toLocaleString(undefined, dateOptions);
+                    span.textContent = `due: ${dateString} (${formatTimeLeft(due)})`;
+                }
+            });
+        }, 60000);
 
         // Init
         checkAuth();
