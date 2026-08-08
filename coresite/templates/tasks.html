@@ -55,6 +55,7 @@
     <div id="app-section" style="display: none;">
         <form id="add-task-form" class="add-form">
             <input type="text" id="task-title" placeholder="What needs to be done?" required>
+            <input type="datetime-local" id="task-due-date" required>
             <button type="submit">Add Task</button>
         </form>
         
@@ -76,6 +77,7 @@
         const taskListEl = document.getElementById('task-list');
         const formEl = document.getElementById('add-task-form');
         const titleEl = document.getElementById('task-title');
+        const dueDateEl = document.getElementById('task-due-date');
         const logoutBtn = document.getElementById('logout-btn');
 
         // Check if user is logged in
@@ -170,14 +172,18 @@
             tasks.forEach(task => {
                 const card = document.createElement('div');
                 card.className = 'task-card';
+                console.log("Rendering task:", task);
                 
                 const titleText = document.createTextNode(task.title);
+                const dateString = new Date(task.due_date).toLocaleString();
+                const dueDate = document.createTextNode(` (Due: ${dateString})`);
                 const span = document.createElement('span');
                 if (task.completed) span.className = 'completed';
                 const strong = document.createElement('strong');
                 strong.appendChild(titleText);
                 span.appendChild(strong);
-                
+
+                span.appendChild(dueDate);
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-btn';
                 deleteBtn.textContent = 'Delete';
@@ -193,17 +199,19 @@
         formEl.addEventListener('submit', async (e) => {
             e.preventDefault();
             const title = titleEl.value.trim();
-            if (!title) return;
+            const dueDate = dueDateEl.value;
+            if (!title || !dueDate) return;
 
             try {
                 const response = await fetch(apiBaseUrl, {
                     method: 'POST',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({ title: title })
+                    body: JSON.stringify({ title: title, due_date: dueDate })
                 });
 
                 if (response.ok) {
                     titleEl.value = '';
+                    dueDateEl.value = '';
                     fetchTasks();
                 } else if (response.status === 401) {
                     logoutBtn.click();

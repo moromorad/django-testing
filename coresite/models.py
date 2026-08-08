@@ -17,6 +17,8 @@ class Task(models.Model):
     # Automatically saves the exact timestamp when a task is first created
     created_at = models.DateTimeField(auto_now_add=True)
 
+    due_date = models.DateTimeField()
+
     owner = models.ForeignKey(
     "auth.User", related_name="tasks", on_delete=models.CASCADE
     )

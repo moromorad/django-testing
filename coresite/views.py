@@ -1,4 +1,8 @@
 # pyrefly: ignore [missing-import]
+from typing import Optional, Any
+from django.http import HttpRequest, HttpResponse
+from rest_framework.request import Request
+from rest_framework.serializers import BaseSerializer
 from django.shortcuts import render
 from rest_framework import viewsets
 from .models import Task, Weather
@@ -15,12 +19,12 @@ from rest_framework.exceptions import Throttled
 
 
 class LoginRateThrottle(AnonRateThrottle):
-    rate = '5/minute'
+    rate: str = '5/minute'
 
 
 class ThrottledTokenObtainPairView(TokenObtainPairView):
     throttle_classes = [LoginRateThrottle]
-    def throttled(self, request, wait):
+    def throttled(self, request: Request | HttpRequest, wait: int) -> None:
         raise Throttled(detail="There were too many failed login attempts. Please try again later.")
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -30,27 +34,27 @@ class TaskViewSet(viewsets.ModelViewSet):
     # Tell Django which translator to use
     serializer_class = TaskSerializer
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: BaseSerializer) -> None:
         serializer.save(owner=self.request.user)
 
 
-def task_interface(request):
-    latest_weather = Weather.objects.first()
-    weather_count = Weather.objects.count()
+def task_interface(request: HttpRequest) -> HttpResponse:
+    latest_weather: Optional[Weather] = Weather.objects.first()
+    weather_count: int = Weather.objects.count()
     
-    diff = None
+    diff: Optional[float] = None
+    abs_diff: Optional[float] = None
+    
     if weather_count > 1:
         # If we have at least 5 records, get the 5th (index 4)
         if weather_count >= 5:
-            past_weather = Weather.objects.all()[4]
+            past_weather: Weather = Weather.objects.all()[4]
         # Otherwise, just grab the oldest available record
         else:
-            past_weather = Weather.objects.last()
+            past_weather: Weather = Weather.objects.last()
             
         diff = latest_weather.temp - past_weather.temp
         abs_diff = abs(diff)
-    else:
-        abs_diff = None
 
     return render(request, "tasks.html", {"weather": latest_weather, "temp_diff": diff, "abs_diff": abs_diff})
 
