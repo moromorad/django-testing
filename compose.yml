@@ -6,13 +6,18 @@ services:
 
   web:
     build: .
-    command: sh -c "python manage.py collectstatic --noinput && python manage.py migrate && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    #for FastAPI endpoints
+    #command: sh -c "python manage.py collectstatic --noinput && python manage.py migrate && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    #for Django only endpoints
+    command: sh -c "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn myproject.wsgi:application --bind 0.0.0.0:8000 --reload"
     ports:
       - "8000:8000"
     volumes:
       - .:/app
     depends_on:
       - redis
+    env_file:
+      - .env
 
   celery_worker:
     build: .

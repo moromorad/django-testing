@@ -18,9 +18,6 @@ from coresite.models import Task, Weather
 app = FastAPI(
     title="To-do App",
     description="FastAPI handling modern endpoints, routing everything else to Django.",
-)
-
-
 # 4. Define your FastAPI endpoints here
 
 
@@ -54,6 +51,8 @@ def update_task(task: TaskCreate, task_id:int) -> TaskResponse:
         old_task = Task.objects.get(id=task_id)
         old_task.title = task.title
         old_task.completed = task.completed
+        if task.due_date:
+            old_task.due_date = task.due_date
         old_task.save()
         return old_task
     except Task.DoesNotExist:

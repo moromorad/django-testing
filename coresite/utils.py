@@ -1,6 +1,8 @@
 
-
-
+from google import genai
+from schemas import TaskCreateList, TaskCreate
+from datetime import datetime, timezone
+import zoneinfo
 
 def get_weather_category(weather_code: int) -> str:
     """
@@ -45,3 +47,29 @@ def get_weather_category(weather_code: int) -> str:
     
     # Return the description, or a default message if the code isn't recognized
     return wmo_codes.get(weather_code, "Unknown weather code")
+
+
+
+def text_to_tasks(text: str, user_timezone: str = "UTC") -> list[TaskCreate]:
+    tz = zoneinfo.ZoneInfo(user_timezone)
+    current_time_str = datetime.now(tz).strftime("%A, %Y-%m-%d %H:%M:%S %z")
+    instructions = (
+        f"You are a productivity helper designed to generate task(s) from user input.\n"
+        f"The user is in the timezone: {user_timezone}.\n"
+        f"CURRENT DATE & TIME: {current_time_str}\n"
+        f"Use the current date and time above (which includes the timezone offset) to resolve relative dates like 'tomorrow', 'next Monday', or 'in 3 hours'. "
+        f"Make sure to include the timezone offset (like +03:00) in your output. Only enter due date up to minutes, leave seconds at 00. If no due date is implied, leave due_date as null."
+    )
+    client = genai.Client()
+    interaction = client.interactions.create(
+        model="gemini-3.6-flash",
+        input=f"{instructions}\n\nUser Input: {text}",
+        response_format= {
+            "type": "text",
+            "mime_type": "application/json",
+            "schema": TaskCreateList.model_json_schema(),
+        },
+    )
+
+    result = TaskCreateList.model_validate_json(interaction.output_text)
+    return result.tasks

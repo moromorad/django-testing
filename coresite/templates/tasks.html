@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <title>My To-Do List</title>
     <style>
+        * { box-sizing: border-box; }
         body { font-family: sans-serif; margin: 40px; background: #f4f4f4; color: #333; }
-        .container { max-width: 500px; margin: auto; }
+        .container { max-width: 900px; margin: auto; }
+        .centered-content { max-width: 500px; margin: auto; }
         .add-form { display: flex; gap: 10px; margin-bottom: 20px; }
         .add-form input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
         .add-form button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
@@ -19,31 +21,34 @@
 </head>
 <body>
     <div class="container">
-        <h1>📝 Live To-Do Interface</h1>
-        
-        <div class="weather-panel">
-            {% if weather %}
-                <span>
-                    ⛅ Current Weather: {{ weather.weather }} | 🌡️ {{ weather.temp }}°C
-                    {% if temp_diff %}
-                        <small style="margin-left: 5px;">
-                        {% if temp_diff > 0 %}
-                            <span style="color: #d32f2f;">(🔺 +{{ abs_diff|floatformat:1 }}°C)</span>
-                        {% elif temp_diff < 0 %}
-                            <span style="color: #1976d2;">(🔻 {{ abs_diff|floatformat:1 }}°C)</span>
-                        {% else %}
-                            <span style="color: #757575;">(➖ No change)</span>
+        <div class="centered-content">
+            <h1 style="text-align: center;">📝 Live To-Do Interface</h1>
+            
+            <div class="weather-panel">
+                {% if weather %}
+                    <div>⛅ Current Weather: {{ weather.weather }}</div>
+                    <div style="margin-top: 5px;">
+                        🌡️ {{ weather.temp }}°C
+                        {% if temp_diff %}
+                            <small style="margin-left: 5px;">
+                            {% if temp_diff > 0 %}
+                                <span style="color: #d32f2f;">(🔺 +{{ abs_diff|floatformat:1 }}°C)</span>
+                            {% elif temp_diff < 0 %}
+                                <span style="color: #1976d2;">(🔻 {{ abs_diff|floatformat:1 }}°C)</span>
+                            {% else %}
+                                <span style="color: #757575;">(➖ No change)</span>
+                            {% endif %}
+                            </small>
                         {% endif %}
-                        </small>
-                    {% endif %}
-                </span>
-                <div style="font-size: 0.8em; margin-top: 5px; font-weight: normal;">Updated: {{ weather.time|date:"g:i A, M j" }}</div>
-            {% else %}
-                <span>Weather data is not available yet. (Run the Celery task!)</span>
-            {% endif %}
+                    </div>
+                    <div style="font-size: 0.8em; margin-top: 5px; font-weight: normal;">Updated: {{ weather.time|date:"g:i A, M j" }}</div>
+                {% else %}
+                    <span>Weather data is not available yet. (Run the Celery task!)</span>
+                {% endif %}
+            </div>
         </div>
         
-    <div id="login-section" style="display: none;">
+    <div id="login-section" class="centered-content" style="display: none;">
         <h2>Login</h2>
         <form id="login-form" class="add-form">
             <input type="text" id="login-username" placeholder="Username" required>
@@ -54,16 +59,31 @@
     </div>
 
     <div id="app-section" style="display: none;">
-        <form id="add-task-form" class="add-form">
-            <input type="text" id="task-title" placeholder="What needs to be done?" required>
-            <input type="datetime-local" id="task-due-date" required>
-            <button type="submit">Add Task</button>
-        </form>
-        
-        <div id="task-list">
-            <p>Loading tasks...</p>
+        <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+            <!-- Left Panel: Normal Tasks -->
+            <div style="flex: 1 1 300px;">
+                <form id="add-task-form" class="add-form">
+                    <input type="text" id="task-title" placeholder="What needs to be done?" required>
+                    <input type="datetime-local" id="task-due-date">
+                    <button type="submit">Add Task</button>
+                </form>
+                
+                <div id="task-list">
+                    <p>Loading tasks...</p>
+                </div>
+                <button id="logout-btn" style="margin-top: 20px;">Logout</button>
+            </div>
+            
+            <!-- Right Panel: AI Tasks -->
+            <div class="ai-panel" style="flex: 1 1 300px; background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <h3 style="margin-top: 0;">✨ AI Task Generator</h3>
+                <form id="ai-task-form" style="display: flex; flex-direction: column; gap: 10px;">
+                    <textarea id="ai-task-text" rows="5" placeholder="E.g., Remind me to buy groceries tomorrow at 5pm and call Mom on Sunday." style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical;" required></textarea>
+                    <button type="submit" style="padding: 10px 20px; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer;">Generate Tasks</button>
+                </form>
+                <p id="ai-task-status" style="margin-top: 10px; font-size: 0.9em;"></p>
+            </div>
         </div>
-        <button id="logout-btn" style="margin-top: 20px;">Logout</button>
     </div>
 
     <script>
@@ -185,6 +205,18 @@
                 taskListEl.innerHTML = '<p>No tasks left! Rest up. 😎</p>';
                 return;
             }
+            
+            // Sort tasks: incomplete first, then by earliest due date
+            tasks.sort((a, b) => {
+                if (a.completed !== b.completed) {
+                    return a.completed ? 1 : -1;
+                }
+                if (!a.due_date && !b.due_date) return 0;
+                if (!a.due_date) return 1;
+                if (!b.due_date) return -1;
+                return new Date(a.due_date) - new Date(b.due_date);
+            });
+            
             taskListEl.innerHTML = '';
             tasks.forEach(task => {
                 const card = document.createElement('div');
@@ -193,12 +225,22 @@
                 
                 const titleText = document.createTextNode(task.title);
                 
-                const dateOptions = { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
-                const dateString = new Date(task.due_date).toLocaleString(undefined, dateOptions);
                 const dueDateSpan = document.createElement('span');
-                dueDateSpan.className = 'due-date-label time-left-updater';
-                dueDateSpan.dataset.dueDate = task.due_date;
-                dueDateSpan.textContent = `due: ${dateString} (${formatTimeLeft(task.due_date)})`;
+                if (task.due_date) {
+                    const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+                    const dateString = new Date(task.due_date).toLocaleString(undefined, dateOptions);
+                    dueDateSpan.className = 'due-date-label time-left-updater';
+                    dueDateSpan.dataset.dueDate = task.due_date;
+                    dueDateSpan.textContent = `${dateString} (${formatTimeLeft(task.due_date)})`;
+                    
+                    if (new Date(task.due_date) < new Date() && !task.completed) {
+                        dueDateSpan.style.color = '#dc3545';
+                        dueDateSpan.style.fontWeight = 'bold';
+                    }
+                } else {
+                    dueDateSpan.className = 'due-date-label';
+                    dueDateSpan.textContent = 'No due date';
+                }
                 
                 const span = document.createElement('span');
                 if (task.completed) span.className = 'completed';
@@ -239,10 +281,13 @@
             e.preventDefault();
             const title = titleEl.value.trim();
             const dueDateRaw = dueDateEl.value;
-            if (!title || !dueDateRaw) return;
+            if (!title) return;
 
-            // Ensure the date is sent with exactly :00 seconds
-            const dueDate = dueDateRaw.substring(0, 16) + ':00';
+            let dueDate = null;
+            if (dueDateRaw) {
+                // Ensure the date is sent with exactly :00 seconds
+                dueDate = dueDateRaw.substring(0, 16) + ':00';
+            }
 
             try {
                 const response = await fetch(apiBaseUrl, {
@@ -264,6 +309,47 @@
                 console.error("Error adding task:", error);
             }
         });
+        // AI Task Generator
+        const aiFormEl = document.getElementById('ai-task-form');
+        const aiTextEl = document.getElementById('ai-task-text');
+        const aiStatusEl = document.getElementById('ai-task-status');
+
+        aiFormEl.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = aiTextEl.value.trim();
+            if (!text) return;
+
+            aiStatusEl.textContent = 'Generating tasks...';
+            aiStatusEl.style.color = '#333';
+
+            try {
+                const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const response = await fetch('/api/tasks/gen/', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ text: text, timezone: userTimezone })
+                });
+
+                if (response.ok) {
+                    aiTextEl.value = '';
+                    aiStatusEl.textContent = 'Tasks created successfully!';
+                    aiStatusEl.style.color = '#28a745';
+                    fetchTasks();
+                    setTimeout(() => aiStatusEl.textContent = '', 3000);
+                } else if (response.status === 401) {
+                    logoutBtn.click();
+                } else {
+                    const data = await response.json();
+                    aiStatusEl.textContent = data.message || 'Failed to generate tasks.';
+                    aiStatusEl.style.color = '#dc3545';
+                }
+            } catch (error) {
+                console.error("Error generating tasks:", error);
+                aiStatusEl.textContent = 'An error occurred.';
+                aiStatusEl.style.color = '#dc3545';
+            }
+        });
+
         // Toggle Task Completion
         async function toggleTask(task) {
             try {
@@ -310,9 +396,19 @@
             document.querySelectorAll('.time-left-updater').forEach(span => {
                 const due = span.dataset.dueDate;
                 if (due) {
-                    const dateOptions = { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+                    const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
                     const dateString = new Date(due).toLocaleString(undefined, dateOptions);
-                    span.textContent = `due: ${dateString} (${formatTimeLeft(due)})`;
+                    span.textContent = `${dateString} (${formatTimeLeft(due)})`;
+                    
+                    const card = span.closest('.task-card');
+                    const isCompleted = card && card.querySelector('.completed');
+                    if (new Date(due) < new Date() && !isCompleted) {
+                        span.style.color = '#dc3545';
+                        span.style.fontWeight = 'bold';
+                    } else {
+                        span.style.color = '';
+                        span.style.fontWeight = '';
+                    }
                 }
             });
         }, 60000);

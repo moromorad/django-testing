@@ -172,4 +172,5 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
+
 ALLOWED_HOSTS = ['*']
