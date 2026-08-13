@@ -50,16 +50,41 @@ def get_weather_category(weather_code: int) -> str:
 
 
 
-def text_to_tasks(text: str, user_timezone: str = "UTC") -> list[TaskCreate]:
+def text_to_tasks(text: str, user_timezone: str = "UTC", ast_outline: str = None) -> TaskCreate:
     tz = zoneinfo.ZoneInfo(user_timezone)
     current_time_str = datetime.now(tz).strftime("%A, %Y-%m-%d %H:%M:%S %z")
-    instructions = (
-        f"You are a productivity helper designed to generate task(s) from user input.\n"
+
+    instructions = ""
+
+    if ast_outline:
+        instructions += (
+            f"--- REPOSITORY OUTLINE ---\n{ast_outline}\n--------------------------\n\n"
+        )
+
+    instructions += (
+        f"You are a Senior Tech Lead generating detailed developer tickets.\n"
         f"The user is in the timezone: {user_timezone}.\n"
-        f"CURRENT DATE & TIME: {current_time_str}\n"
-        f"Use the current date and time above (which includes the timezone offset) to resolve relative dates like 'tomorrow', 'next Monday', or 'in 3 hours'. "
-        f"Make sure to include the timezone offset (like +03:00) in your output. Only enter due date up to minutes, leave seconds at 00. If no due date is implied, leave due_date as null."
+        f"CURRENT DATE & TIME: {current_time_str}\n\n"
+        f"CRITICAL RULES:\n"
+        f"1. You MUST write a technical summary in the `description` field.\n"
+        f"2. You MUST populate the `subtasks` array with step-by-step instructions. DO NOT leave it empty.\n"
+        f"3. Calculate deadlines from the CURRENT DATE and format strictly as an ISO 8601 string with the timezone offset (e.g., 'YYYY-MM-DDTHH:MM:SS+03:00').\n"
+        f"4. You must output EXACTLY ONE task object. Do not wrap it in a list or a 'tasks' dictionary.\n\n"
+        f"OUTPUT EXACTLY IN THIS JSON FORMAT:\n"
+        """{
+          "title": "Add register_bulk_routes method",
+          "description": "Implement bulk route registration in src/flask/app.py.",
+          "ticket_type": "feature",
+          "due_date": "2026-08-18T17:00:00+03:00",
+          "completed": false,
+          "subtasks": [
+            {"title": "Add method signature", "completed": false},
+            {"title": "Write unit tests", "completed": false}
+          ]
+        }"""
     )
+
+    print(instructions)
     client = genai.Client()
     interaction = client.interactions.create(
         model="gemini-3.6-flash",
@@ -67,9 +92,8 @@ def text_to_tasks(text: str, user_timezone: str = "UTC") -> list[TaskCreate]:
         response_format= {
             "type": "text",
             "mime_type": "application/json",
-            "schema": TaskCreateList.model_json_schema(),
         },
     )
 
-    result = TaskCreateList.model_validate_json(interaction.output_text)
-    return result.tasks
+    result = TaskCreate.model_validate_json(interaction.output_text)
+    return result

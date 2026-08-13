@@ -12,6 +12,9 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class ProjectSerializer(serializers.ModelSerializer):
     tasks = TaskSerializer(many=True, read_only=True)
+    github_token = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, default=""
+    )
 
     class Meta:
         model = Project

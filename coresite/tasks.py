@@ -3,7 +3,7 @@ from ast import parse
 from celery import shared_task
 from .models import Weather
 import requests
-from .utils import get_weather_category
+from .services.utils import get_weather_category
 from django.utils.dateparse import parse_datetime
 
 @shared_task

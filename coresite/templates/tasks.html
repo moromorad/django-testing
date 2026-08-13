@@ -11,12 +11,207 @@
         .add-form { display: flex; gap: 10px; margin-bottom: 20px; }
         .add-form input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
         .add-form button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .task-card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .task-card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .task-card-header { display: flex; justify-content: space-between; align-items: center; }
         .completed { text-decoration: line-through; color: gray; }
         .delete-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
         .weather-panel { background: #e0f7fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center; color: #00796b; font-weight: bold; border: 1px solid #b2ebf2; }
         .weather-panel span { font-size: 1.2em; }
         .due-date-label { font-size: 0.8em; color: #888; margin-left: 10px; font-weight: normal; }
+
+        /* Project Selector */
+        .project-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding: 10px 14px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .project-selector label {
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #555;
+            white-space: nowrap;
+        }
+        .project-selector select {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.95em;
+            background: #fafafa;
+            cursor: pointer;
+        }
+
+        /* Expand Toggle */
+        .expand-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85em;
+            color: #888;
+            padding: 2px 6px;
+            margin-right: 6px;
+            transition: transform 0.2s ease;
+            display: inline-block;
+        }
+        .expand-toggle:hover { color: #333; }
+        .expand-toggle.expanded { transform: rotate(90deg); }
+
+        /* Subtask List */
+        .subtask-list {
+            margin-top: 10px;
+            margin-left: 28px;
+            padding: 8px 0 4px 12px;
+            border-left: 3px solid #e0e0e0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+        }
+        .subtask-list.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        .subtask-list.expanded-list {
+            max-height: 1000px;
+            opacity: 1;
+        }
+        .subtask-item {
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+            font-size: 0.92em;
+            color: #555;
+        }
+        .subtask-item input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        .subtask-item .subtask-title-completed {
+            text-decoration: line-through;
+            color: #aaa;
+        }
+
+        /* Task description */
+        .task-description {
+            margin: 8px 0 6px 28px;
+            padding: 6px 10px;
+            font-size: 0.88em;
+            color: #666;
+            background: #fafafa;
+            border-radius: 4px;
+            border-left: 3px solid #ccc;
+            line-height: 1.4;
+        }
+
+        /* Add subtask input */
+        .add-subtask-form {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px dashed #e0e0e0;
+        }
+        .add-subtask-form input {
+            flex: 1;
+            padding: 5px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 0.88em;
+        }
+        .add-subtask-form button {
+            padding: 5px 10px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            font-size: 0.82em;
+            cursor: pointer;
+        }
+
+        /* Ticket type badge */
+        .ticket-badge {
+            display: inline-block;
+            font-size: 0.7em;
+            font-weight: bold;
+            padding: 2px 7px;
+            border-radius: 3px;
+            margin-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+        }
+        .ticket-badge.bug { background: #fce4ec; color: #c62828; }
+        .ticket-badge.feature { background: #e8f5e9; color: #2e7d32; }
+        .ticket-badge.chore { background: #fff3e0; color: #e65100; }
+
+        /* Modal Styles */
+        dialog {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+        }
+        dialog::backdrop {
+            background: rgba(0,0,0,0.4);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .modal-header h3 { margin: 0; }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #888;
+        }
+        .close-btn:hover { color: #333; }
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .form-group label {
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .btn-primary {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -62,10 +257,34 @@
         <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
             <!-- Left Panel: Normal Tasks -->
             <div style="flex: 1 1 300px;">
-                <form id="add-task-form" class="add-form">
-                    <input type="text" id="task-title" placeholder="What needs to be done?" required>
-                    <input type="datetime-local" id="task-due-date">
-                    <button type="submit">Add Task</button>
+                <!-- Project Selector -->
+                <div style="display: flex; gap: 10px; margin-bottom: 16px; align-items: center;">
+                    <div class="project-selector" style="flex: 1; margin-bottom: 0;">
+                        <label for="project-select">📂 Project:</label>
+                        <select id="project-select">
+                            <option value="all">All Tasks</option>
+                            <option value="none">Unassigned</option>
+                        </select>
+                    </div>
+                    <button id="view-ast-btn" class="btn-secondary" style="margin-left: 0; padding: 0 15px; white-space: nowrap; background: #17a2b8; display: none;">View AST</button>
+                    <button id="sync-repo-btn" class="btn-secondary" style="margin-left: 0; padding: 0 15px; white-space: nowrap; background: #ffc107; color: #333; display: none;">Sync Repo</button>
+                    <button id="open-create-project-btn" class="btn-secondary" style="margin-left: 0; padding: 0 15px; white-space: nowrap;">+ New Project</button>
+                </div>
+
+                <form id="add-task-form" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="task-title" placeholder="What needs to be done?" required style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                        <select id="task-type" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; background: white; cursor: pointer;">
+                            <option value="feature">🟢 Feature</option>
+                            <option value="bug">🔴 Bug</option>
+                            <option value="chore">🟠 Chore</option>
+                        </select>
+                    </div>
+                    <textarea id="task-description" rows="2" placeholder="Description (optional)" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; font-family: sans-serif;"></textarea>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="datetime-local" id="task-due-date" style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                        <button type="submit" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Add Task</button>
+                    </div>
                 </form>
                 
                 <div id="task-list">
@@ -78,7 +297,13 @@
             <div class="ai-panel" style="flex: 1 1 300px; background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                 <h3 style="margin-top: 0;">✨ AI Task Generator</h3>
                 <form id="ai-task-form" style="display: flex; flex-direction: column; gap: 10px;">
-                    <textarea id="ai-task-text" rows="5" placeholder="E.g., Remind me to buy groceries tomorrow at 5pm and call Mom on Sunday." style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical;" required></textarea>
+                    <div class="project-selector" style="margin-bottom: 0; padding: 8px 10px;">
+                        <label for="ai-project-select" style="font-size: 0.85em;">📂 Project:</label>
+                        <select id="ai-project-select">
+                            <option value="none">No Project</option>
+                        </select>
+                    </div>
+                    <textarea id="ai-task-text" rows="5" placeholder="E.g., Add input validation to the signup form and write unit tests for the auth module." style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical;" required></textarea>
                     <button type="submit" style="padding: 10px 20px; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer;">Generate Tasks</button>
                 </form>
                 <p id="ai-task-status" style="margin-top: 10px; font-size: 0.9em;"></p>
@@ -86,8 +311,43 @@
         </div>
     </div>
 
+    <!-- Create Project Modal -->
+    <dialog id="create-project-modal">
+        <div class="modal-header">
+            <h3>Create New Project</h3>
+            <button class="close-btn" id="close-project-modal">&times;</button>
+        </div>
+        <form id="create-project-form">
+            <div class="form-group">
+                <label for="project-name">Project Name *</label>
+                <input type="text" id="project-name" placeholder="E.g., Website Redesign" required>
+            </div>
+            <div class="form-group">
+                <label for="project-repo">GitHub Repo</label>
+                <input type="text" id="project-repo" placeholder="owner/repo (e.g., octocat/Hello-World)">
+            </div>
+            <div class="form-group">
+                <label for="project-token">GitHub Token (Optional)</label>
+                <input type="password" id="project-token" placeholder="Required only if repo is private">
+                <small style="color: #666; font-size: 0.8em;">Used for syncing repo AST. We recommend a fine-grained PAT.</small>
+            </div>
+            <p id="project-error" style="color: red; display: none; font-size: 0.9em;"></p>
+            <button type="submit" class="btn-primary">Create Project</button>
+        </form>
+    </dialog>
+
+    <!-- AST Modal -->
+    <dialog id="ast-modal" style="max-width: 800px; width: 95%;">
+        <div class="modal-header">
+            <h3>Project AST Outline</h3>
+            <button class="close-btn" id="close-ast-modal">&times;</button>
+        </div>
+        <pre id="ast-content" style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-family: monospace; font-size: 0.9em; white-space: pre-wrap; word-wrap: break-word; max-height: 60vh; overflow-y: auto;"></pre>
+    </dialog>
+
     <script>
         const apiBaseUrl = '/api/tasks/';
+        const projectsApiUrl = '/api/projects/';
         const tokenUrl = '/api/token/';
         
         const loginSection = document.getElementById('login-section');
@@ -100,6 +360,28 @@
         const titleEl = document.getElementById('task-title');
         const dueDateEl = document.getElementById('task-due-date');
         const logoutBtn = document.getElementById('logout-btn');
+        const projectSelect = document.getElementById('project-select');
+        const aiProjectSelect = document.getElementById('ai-project-select');
+
+        // Modal elements
+        const createProjectModal = document.getElementById('create-project-modal');
+        const openProjectModalBtn = document.getElementById('open-create-project-btn');
+        const closeProjectModalBtn = document.getElementById('close-project-modal');
+        const createProjectForm = document.getElementById('create-project-form');
+        const projectError = document.getElementById('project-error');
+
+        const astModal = document.getElementById('ast-modal');
+        const viewAstBtn = document.getElementById('view-ast-btn');
+        const syncRepoBtn = document.getElementById('sync-repo-btn');
+        const closeAstModalBtn = document.getElementById('close-ast-modal');
+        const astContent = document.getElementById('ast-content');
+
+        // Track which tasks have their subtask list expanded
+        const expandedTasks = new Set();
+
+        // All fetched tasks and projects
+        let allTasks = [];
+        let allProjects = [];
 
         // Check if user is logged in
         function checkAuth() {
@@ -107,6 +389,7 @@
             if (token) {
                 loginSection.style.display = 'none';
                 appSection.style.display = 'block';
+                fetchProjects();
                 fetchTasks();
             } else {
                 loginSection.style.display = 'block';
@@ -164,23 +447,203 @@
             };
         }
 
-        // Fetch Tasks
+        // ----- PROJECT SELECTOR -----
+
+        async function fetchProjects() {
+            try {
+                const response = await fetch(projectsApiUrl, { headers: getAuthHeaders() });
+                if (response.status === 401) { logoutBtn.click(); return; }
+                const projects = await response.json();
+                allProjects = projects;
+
+                // Keep the static options, add project options
+                // Remove old dynamic options first
+                while (projectSelect.options.length > 2) {
+                    projectSelect.remove(2);
+                }
+                while (aiProjectSelect.options.length > 1) {
+                    aiProjectSelect.remove(1);
+                }
+
+                projects.forEach(project => {
+                    const opt = document.createElement('option');
+                    opt.value = project.id;
+                    opt.textContent = project.name;
+                    projectSelect.appendChild(opt);
+
+                    const aiOpt = document.createElement('option');
+                    aiOpt.value = project.id;
+                    aiOpt.textContent = project.name;
+                    aiProjectSelect.appendChild(aiOpt);
+                });
+
+                // Restore saved selections
+                const saved = localStorage.getItem('selected_project');
+                if (saved && [...projectSelect.options].some(o => o.value === saved)) {
+                    projectSelect.value = saved;
+                }
+                const savedAi = localStorage.getItem('selected_ai_project');
+                if (savedAi && [...aiProjectSelect.options].some(o => o.value === savedAi)) {
+                    aiProjectSelect.value = savedAi;
+                }
+                
+                updateProjectButtonsVisibility();
+            } catch (error) {
+                console.error("Error fetching projects:", error);
+            }
+        }
+
+        function updateProjectButtonsVisibility() {
+            const selectedId = projectSelect.value;
+            const project = allProjects.find(p => String(p.id) === selectedId);
+            
+            if (project && project.ast_outline) {
+                viewAstBtn.style.display = 'inline-block';
+                viewAstBtn.onclick = () => {
+                    astContent.textContent = project.ast_outline;
+                    astModal.showModal();
+                };
+            } else {
+                viewAstBtn.style.display = 'none';
+            }
+
+            if (project && project.github_repo) {
+                syncRepoBtn.style.display = 'inline-block';
+            } else {
+                syncRepoBtn.style.display = 'none';
+            }
+        }
+
+        syncRepoBtn.addEventListener('click', async () => {
+            const selectedId = projectSelect.value;
+            const project = allProjects.find(p => String(p.id) === selectedId);
+            if (!project) return;
+
+            const originalText = syncRepoBtn.textContent;
+            syncRepoBtn.textContent = 'Syncing...';
+            syncRepoBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${projectsApiUrl}${project.id}/sync_repo/`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({}) // Token falls back to saved token
+                });
+
+                if (response.ok) {
+                    await fetchProjects(); // Refresh to get the new AST
+                    alert('Repository synced successfully!');
+                } else if (response.status === 401) {
+                    logoutBtn.click();
+                } else {
+                    const data = await response.json();
+                    alert(`Error syncing: ${data.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error("Error syncing repo:", error);
+                alert("An error occurred during sync.");
+            } finally {
+                syncRepoBtn.textContent = originalText;
+                syncRepoBtn.disabled = false;
+            }
+        });
+
+        closeAstModalBtn.addEventListener('click', () => {
+            astModal.close();
+        });
+
+        projectSelect.addEventListener('change', () => {
+            localStorage.setItem('selected_project', projectSelect.value);
+            renderFilteredTasks();
+            updateProjectButtonsVisibility();
+        });
+
+        aiProjectSelect.addEventListener('change', () => {
+            localStorage.setItem('selected_ai_project', aiProjectSelect.value);
+        });
+
+        // ----- CREATE PROJECT -----
+
+        openProjectModalBtn.addEventListener('click', () => {
+            createProjectModal.showModal();
+            projectError.style.display = 'none';
+        });
+
+        closeProjectModalBtn.addEventListener('click', () => {
+            createProjectModal.close();
+            createProjectForm.reset();
+        });
+
+        createProjectForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('project-name').value.trim();
+            const repo = document.getElementById('project-repo').value.trim();
+            const token = document.getElementById('project-token').value.trim();
+            
+            if (!name) return;
+
+            const payload = { name: name };
+            if (repo) payload.github_repo = repo;
+            if (token) payload.github_token = token;
+
+            try {
+                const response = await fetch(projectsApiUrl, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    createProjectForm.reset();
+                    createProjectModal.close();
+                    await fetchProjects(); // Refresh the dropdowns
+                } else if (response.status === 401) {
+                    logoutBtn.click();
+                } else {
+                    const data = await response.json();
+                    projectError.textContent = "Error: " + JSON.stringify(data);
+                    projectError.style.display = 'block';
+                }
+            } catch (error) {
+                console.error("Error creating project:", error);
+                projectError.textContent = "An error occurred.";
+                projectError.style.display = 'block';
+            }
+        });
+
+        function getSelectedProjectFilter() {
+            return projectSelect.value; // "all", "none", or a numeric ID string
+        }
+
+        function filterTasksByProject(tasks) {
+            const filter = getSelectedProjectFilter();
+            if (filter === 'all') return tasks;
+            if (filter === 'none') return tasks.filter(t => !t.project);
+            return tasks.filter(t => String(t.project) === filter);
+        }
+
+        // ----- FETCH & RENDER TASKS -----
+
         async function fetchTasks() {
             try {
                 const response = await fetch(apiBaseUrl, { headers: getAuthHeaders() });
                 
                 if (response.status === 401) {
-                    // Token expired or invalid
                     logoutBtn.click();
                     return;
                 }
                 
-                const tasks = await response.json();
-                renderTasks(tasks);
+                allTasks = await response.json();
+                renderFilteredTasks();
             } catch (error) {
                 console.error("Error fetching tasks:", error);
                 taskListEl.innerHTML = '<p>Error loading tasks.</p>';
             }
+        }
+
+        function renderFilteredTasks() {
+            const filtered = filterTasksByProject(allTasks);
+            renderTasks(filtered);
         }
 
         // Format Time Left Helper
@@ -199,32 +662,99 @@
             return `in ${Math.floor(hours / 24)}d`;
         }
 
+        // Sort helper used for both tasks and subtasks
+        function sortItems(items) {
+            return items.slice().sort((a, b) => {
+                // Incomplete first
+                const aCompleted = a.completed ?? false;
+                const bCompleted = b.completed ?? false;
+                if (aCompleted !== bCompleted) return aCompleted ? 1 : -1;
+
+                // By due date if both have one (tasks only)
+                if (a.due_date || b.due_date) {
+                    if (!a.due_date && !b.due_date) { /* fall through */ }
+                    else if (!a.due_date) return 1;
+                    else if (!b.due_date) return -1;
+                    else return new Date(a.due_date) - new Date(b.due_date);
+                }
+
+                // Alphabetical by title
+                return (a.title || '').localeCompare(b.title || '');
+            });
+        }
+
         // Render Tasks
         function renderTasks(tasks) {
             if (tasks.length === 0) {
-                taskListEl.innerHTML = '<p>No tasks left! Rest up. 😎</p>';
+                taskListEl.innerHTML = '<p>No tasks here! Rest up. 😎</p>';
                 return;
             }
             
-            // Sort tasks: incomplete first, then by earliest due date
-            tasks.sort((a, b) => {
-                if (a.completed !== b.completed) {
-                    return a.completed ? 1 : -1;
-                }
-                if (!a.due_date && !b.due_date) return 0;
-                if (!a.due_date) return 1;
-                if (!b.due_date) return -1;
-                return new Date(a.due_date) - new Date(b.due_date);
-            });
+            const sorted = sortItems(tasks);
             
             taskListEl.innerHTML = '';
-            tasks.forEach(task => {
+            sorted.forEach(task => {
                 const card = document.createElement('div');
                 card.className = 'task-card';
-                console.log("Rendering task:", task);
                 
-                const titleText = document.createTextNode(task.title);
-                
+                // --- Header row ---
+                const header = document.createElement('div');
+                header.className = 'task-card-header';
+
+                const leftSpan = document.createElement('span');
+                if (task.completed) leftSpan.className = 'completed';
+
+                // Expand toggle (always shown so users can add subtasks)
+                const subtasks = task.subtasks || [];
+                const toggle = document.createElement('button');
+                toggle.className = 'expand-toggle' + (expandedTasks.has(task.id) ? ' expanded' : '');
+                toggle.textContent = '▶';
+                toggle.onclick = (e) => {
+                    e.stopPropagation();
+                    if (expandedTasks.has(task.id)) {
+                        expandedTasks.delete(task.id);
+                    } else {
+                        expandedTasks.add(task.id);
+                    }
+                    renderFilteredTasks();
+                };
+                leftSpan.appendChild(toggle);
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = task.completed;
+                checkbox.style.marginRight = '10px';
+                checkbox.onclick = () => toggleTask(task);
+
+                const strong = document.createElement('strong');
+                strong.textContent = task.title;
+
+                leftSpan.appendChild(checkbox);
+                leftSpan.appendChild(strong);
+
+                // Ticket type badge
+                if (task.ticket_type) {
+                    const badge = document.createElement('span');
+                    badge.className = `ticket-badge ${task.ticket_type}`;
+                    badge.textContent = task.ticket_type;
+                    leftSpan.appendChild(badge);
+                }
+
+                // Subtask count indicator
+                if (subtasks.length > 0) {
+                    const doneCount = subtasks.filter(s => s.completed).length;
+                    const countSpan = document.createElement('span');
+                    countSpan.style.cssText = 'font-size:0.75em;color:#888;margin-left:8px;';
+                    countSpan.textContent = `(${doneCount}/${subtasks.length})`;
+                    leftSpan.appendChild(countSpan);
+                }
+
+                // Right side: due date + delete
+                const rightContainer = document.createElement('div');
+                rightContainer.style.display = 'flex';
+                rightContainer.style.alignItems = 'center';
+                rightContainer.style.gap = '15px';
+
                 const dueDateSpan = document.createElement('span');
                 if (task.due_date) {
                     const dateOptions = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
@@ -241,26 +771,6 @@
                     dueDateSpan.className = 'due-date-label';
                     dueDateSpan.textContent = 'No due date';
                 }
-                
-                const span = document.createElement('span');
-                if (task.completed) span.className = 'completed';
-                
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.checked = task.completed;
-                checkbox.style.marginRight = '10px';
-                checkbox.onclick = () => toggleTask(task);
-                
-                const strong = document.createElement('strong');
-                strong.appendChild(titleText);
-                
-                span.appendChild(checkbox);
-                span.appendChild(strong);
-
-                const rightContainer = document.createElement('div');
-                rightContainer.style.display = 'flex';
-                rightContainer.style.alignItems = 'center';
-                rightContainer.style.gap = '15px';
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-btn';
@@ -270,17 +780,82 @@
                 rightContainer.appendChild(dueDateSpan);
                 rightContainer.appendChild(deleteBtn);
 
-                card.appendChild(span);
-                card.appendChild(rightContainer);
+                header.appendChild(leftSpan);
+                header.appendChild(rightContainer);
+                card.appendChild(header);
+
+                // --- Expanded area (description + subtasks + add subtask) ---
+                const isExpanded = expandedTasks.has(task.id);
+                const expandDiv = document.createElement('div');
+                expandDiv.className = 'subtask-list ' + (isExpanded ? 'expanded-list' : 'collapsed');
+
+                // Task description (if present)
+                if (task.description) {
+                    const descEl = document.createElement('div');
+                    descEl.className = 'task-description';
+                    descEl.textContent = task.description;
+                    expandDiv.appendChild(descEl);
+                }
+
+                // Existing subtasks
+                const sortedSubtasks = sortItems(subtasks);
+                sortedSubtasks.forEach((sub) => {
+                    const realIndex = subtasks.indexOf(sub);
+
+                    const item = document.createElement('div');
+                    item.className = 'subtask-item';
+
+                    const subCheckbox = document.createElement('input');
+                    subCheckbox.type = 'checkbox';
+                    subCheckbox.checked = sub.completed ?? false;
+                    subCheckbox.onclick = () => toggleSubtask(task, realIndex);
+
+                    const subTitle = document.createElement('span');
+                    subTitle.textContent = sub.title;
+                    if (sub.completed) subTitle.className = 'subtask-title-completed';
+
+                    item.appendChild(subCheckbox);
+                    item.appendChild(subTitle);
+                    expandDiv.appendChild(item);
+                });
+
+                // Add subtask input
+                const addSubForm = document.createElement('div');
+                addSubForm.className = 'add-subtask-form';
+                const subInput = document.createElement('input');
+                subInput.type = 'text';
+                subInput.placeholder = 'Add a subtask...';
+                const subAddBtn = document.createElement('button');
+                subAddBtn.textContent = '+ Add';
+                subAddBtn.onclick = () => {
+                    const title = subInput.value.trim();
+                    if (!title) return;
+                    addSubtask(task, title);
+                };
+                subInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        subAddBtn.click();
+                    }
+                });
+                addSubForm.appendChild(subInput);
+                addSubForm.appendChild(subAddBtn);
+                expandDiv.appendChild(addSubForm);
+
+                card.appendChild(expandDiv);
+
                 taskListEl.appendChild(card);
             });
         }
 
-        // Add Task
+        // ----- ADD TASK -----
+
         formEl.addEventListener('submit', async (e) => {
             e.preventDefault();
             const title = titleEl.value.trim();
             const dueDateRaw = dueDateEl.value;
+            const ticketType = document.getElementById('task-type').value;
+            const description = document.getElementById('task-description').value.trim();
             if (!title) return;
 
             let dueDate = null;
@@ -289,16 +864,26 @@
                 dueDate = dueDateRaw.substring(0, 16) + ':00';
             }
 
+            // Attach project if one is selected
+            const projectFilter = getSelectedProjectFilter();
+            const body = { title: title, due_date: dueDate, ticket_type: ticketType };
+            if (description) body.description = description;
+            if (projectFilter !== 'all' && projectFilter !== 'none') {
+                body.project = parseInt(projectFilter);
+            }
+
             try {
                 const response = await fetch(apiBaseUrl, {
                     method: 'POST',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({ title: title, due_date: dueDate })
+                    body: JSON.stringify(body)
                 });
 
                 if (response.ok) {
                     titleEl.value = '';
                     dueDateEl.value = '';
+                    document.getElementById('task-description').value = '';
+                    document.getElementById('task-type').value = 'feature';
                     fetchTasks();
                 } else if (response.status === 401) {
                     logoutBtn.click();
@@ -309,7 +894,9 @@
                 console.error("Error adding task:", error);
             }
         });
-        // AI Task Generator
+
+        // ----- AI TASK GENERATOR -----
+
         const aiFormEl = document.getElementById('ai-task-form');
         const aiTextEl = document.getElementById('ai-task-text');
         const aiStatusEl = document.getElementById('ai-task-status');
@@ -322,12 +909,21 @@
             aiStatusEl.textContent = 'Generating tasks...';
             aiStatusEl.style.color = '#333';
 
+            // Use the AI panel's own project selector
+            const aiProject = aiProjectSelect.value;
+            const payload = {
+                text: text,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+            if (aiProject !== 'none') {
+                payload.project_id = parseInt(aiProject);
+            }
+
             try {
-                const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                 const response = await fetch('/api/tasks/gen/', {
                     method: 'POST',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({ text: text, timezone: userTimezone })
+                    body: JSON.stringify(payload)
                 });
 
                 if (response.ok) {
@@ -350,7 +946,8 @@
             }
         });
 
-        // Toggle Task Completion
+        // ----- TOGGLE TASK -----
+
         async function toggleTask(task) {
             try {
                 const response = await fetch(`${apiBaseUrl}${task.id}/`, {
@@ -371,7 +968,62 @@
             }
         }
 
-        // Delete Task
+        // ----- TOGGLE SUBTASK -----
+
+        async function toggleSubtask(task, subtaskIndex) {
+            // Clone the subtasks array and flip the target
+            const updatedSubtasks = task.subtasks.map((s, i) => {
+                if (i === subtaskIndex) {
+                    return { ...s, completed: !(s.completed ?? false) };
+                }
+                return { ...s };
+            });
+
+            try {
+                const response = await fetch(`${apiBaseUrl}${task.id}/`, {
+                    method: 'PATCH',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ subtasks: updatedSubtasks })
+                });
+
+                if (response.ok) {
+                    fetchTasks();
+                } else if (response.status === 401) {
+                    logoutBtn.click();
+                } else {
+                    console.error("Failed to toggle subtask");
+                }
+            } catch (error) {
+                console.error("Error toggling subtask:", error);
+            }
+        }
+
+        // ----- ADD SUBTASK -----
+
+        async function addSubtask(task, title) {
+            const updatedSubtasks = [...(task.subtasks || []), { title: title, completed: false }];
+
+            try {
+                const response = await fetch(`${apiBaseUrl}${task.id}/`, {
+                    method: 'PATCH',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ subtasks: updatedSubtasks })
+                });
+
+                if (response.ok) {
+                    fetchTasks();
+                } else if (response.status === 401) {
+                    logoutBtn.click();
+                } else {
+                    console.error("Failed to add subtask");
+                }
+            } catch (error) {
+                console.error("Error adding subtask:", error);
+            }
+        }
+
+        // ----- DELETE TASK -----
+
         async function deleteTask(id) {
             try {
                 const response = await fetch(`${apiBaseUrl}${id}/`, {

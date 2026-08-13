@@ -12,9 +12,13 @@ from django.db import models
 class Project(models.Model):
     name = models.CharField(max_length=100)
     github_repo = models.CharField(
-        max_length=200, help_text="e.g. 'owner/repository'"
+        max_length=200, help_text="e.g. 'owner/repository'", blank=True, default=""
     )
     ast_outline = models.TextField(blank=True, default="")
+    github_token = models.CharField(
+        max_length=500, blank=True, default="",
+        help_text="GitHub personal access token for private repos"
+    )
     owner = models.ForeignKey(
         "auth.User", related_name="projects", on_delete=models.CASCADE
     )
@@ -31,6 +35,8 @@ class Task(models.Model):
         CHORE = "chore", "Chore"
 
     title = models.CharField(max_length=200)
+
+    description = models.CharField(null=True, blank=True)
 
     # Is it done? Defaults to False when created.
     completed = models.BooleanField(default=False)

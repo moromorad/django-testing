@@ -1,4 +1,5 @@
 # pyrefly: ignore [missing-import]
+from rest_framework.decorators import action
 from typing import Optional, Any
 from django.http import HttpRequest, HttpResponse
 from rest_framework.request import Request
@@ -7,7 +8,7 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from .models import Project, Task, Weather
 from .serializers import ProjectSerializer, TaskSerializer
-from . import utils
+from .services import utils
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -23,6 +24,7 @@ from rest_framework.throttling import AnonRateThrottle
 from rest_framework.exceptions import Throttled
 
 from schemas import TaskCreate, TaskCreateList
+from .services.github_parser import sync_project_ast
 
 
 
@@ -46,6 +48,38 @@ class TaskViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer: BaseSerializer) -> None:
         serializer.save(owner=self.request.user)
 
+    @action(detail=False, methods=['post'])
+    def gen(self, request):
+        text: str = request.data.get("text")
+        user_timezone: str = request.data.get("timezone", "UTC")
+        project_id = request.data.get("project_id")
+        if not text: 
+            return Response({"message": "No text provided"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        project = None
+        ast_outline = None
+
+        if project_id:
+            try:
+                project = Project.objects.get(id=project_id, owner=request.user)
+                ast_outline = project.ast_outline
+            except Project.DoesNotExist:
+                return Response({"error": "Project not found or access denied"}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            task = utils.text_to_tasks(text, user_timezone, ast_outline)
+        except Exception:
+            task = utils.text_to_tasks(text, "UTC", ast_outline)
+
+        task_data = task.model_dump()
+        Task.objects.create(owner=request.user, project=project, **task_data)
+            
+        return Response({"message": "Task created successfully"}, status=status.HTTP_201_CREATED)
+        
+        
+
+    
+
 
 class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
@@ -54,7 +88,36 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return Project.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        project = serializer.save(owner=self.request.user)
+        if project.github_repo:
+            try:
+                sync_project_ast(project, project.github_token)
+            except Exception as e:
+                print(f"Auto-sync failed for {project.name}: {e}")
+
+    #endpoint: POST /api/projects/<id>/sync_repo/
+    @action(detail=True, methods=['post'])
+    def sync_repo(self, request, pk=None):
+        project = self.get_object()
+        
+        github_token = request.data.get('github_token') or project.github_token or None
+        
+        try:
+
+            result_message = sync_project_ast(project, github_token)
+            
+            if "Failed" in result_message or "empty" in result_message:
+                return Response({"error": result_message}, status=status.HTTP_400_BAD_REQUEST)
+                
+            return Response({
+                "status": "success", 
+                "message": result_message,
+                "ast_preview": project.ast_outline[:500] if project.ast_outline else ""
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    
 
 
 def task_interface(request: HttpRequest) -> HttpResponse:
@@ -76,31 +139,6 @@ def task_interface(request: HttpRequest) -> HttpResponse:
         abs_diff = abs(diff)
 
     return render(request, "tasks.html", {"weather": latest_weather, "temp_diff": diff, "abs_diff": abs_diff})
-
-
-
-@api_view(['POST'])
-def task_gen(request):
-    if request.method == "POST":
-        text: str = request.data.get("text")
-        user_timezone: str = request.data.get("timezone", "UTC")
-        if not text: 
-            return Response({"message": "No text provided"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            tasks = utils.text_to_tasks(text, user_timezone)
-        except Exception:
-            tasks = utils.text_to_tasks(text, "UTC")
-
-        for task in tasks:
-            task_data = task.model_dump()
-            new_task = Task.objects.create(owner=request.user, **task_data)
-        return Response({"message": "Tasks created successfully"}, status=status.HTTP_201_CREATED)
-
-
-
-
-
 
 
 
