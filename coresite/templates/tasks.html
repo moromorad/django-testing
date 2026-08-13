@@ -3,214 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <title>My To-Do List</title>
+    <!-- Import Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: sans-serif; margin: 40px; background: #f4f4f4; color: #333; }
-        .container { max-width: 900px; margin: auto; }
-        .centered-content { max-width: 500px; margin: auto; }
-        .add-form { display: flex; gap: 10px; margin-bottom: 20px; }
-        .add-form input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-        .add-form button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .task-card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .task-card-header { display: flex; justify-content: space-between; align-items: center; }
-        .completed { text-decoration: line-through; color: gray; }
-        .delete-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        .weather-panel { background: #e0f7fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center; color: #00796b; font-weight: bold; border: 1px solid #b2ebf2; }
-        .weather-panel span { font-size: 1.2em; }
-        .due-date-label { font-size: 0.8em; color: #888; margin-left: 10px; font-weight: normal; }
+        :root {
+            /* Sterile Dark Theme Variables */
+            --bg: #0b0c10;
+            --surface: #15181e;
+            --surface-hover: #1c1f26;
+            --border: #242933;
+            --border-highlight: #333a45;
+            
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #0ea5e9;
+            
+            /* Ticket Badge Colors */
+            --bug-bg: rgba(239, 68, 68, 0.1);
+            --bug-text: #f87171;
+            --feature-bg: rgba(16, 185, 129, 0.1);
+            --feature-text: #34d399;
+            --chore-bg: rgba(245, 158, 11, 0.1);
+            --chore-text: #fbbf24;
+            
+            --radius: 8px;
+            --radius-sm: 6px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0;
+            padding: 0;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-primary); 
+            line-height: 1.5;
+            padding: 40px 20px;
+        }
+
+        .container { 
+            max-width: 1100px; 
+            margin: auto; 
+        }
+
+        .centered-content { 
+            max-width: 600px; 
+            margin: 0 auto 30px auto; 
+        }
+
+        h1, h2, h3 { color: #fff; font-weight: 600; }
+        
+        /* Typography */
+        h1 { font-size: 1.75rem; margin-bottom: 20px; }
+        h3 { font-size: 1.1rem; margin-bottom: 15px; }
+
+        /* Weather Panel */
+        .weather-panel { 
+            background: var(--surface); 
+            padding: 15px 20px; 
+            border-radius: var(--radius); 
+            margin-bottom: 25px; 
+            text-align: center; 
+            color: var(--text-secondary); 
+            border: 1px solid var(--border); 
+            box-shadow: var(--shadow);
+        }
+        .weather-panel span { font-size: 1.1em; color: var(--text-primary); font-weight: 500; }
+
+        /* Layout */
+        .app-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        .left-panel { flex: 1 1 500px; }
+        .right-panel { 
+            flex: 1 1 350px; 
+            position: sticky;
+            top: 40px; /* Sticks to top when scrolling */
+        }
+
+        /* Forms & Inputs */
+        input, select, textarea {
+            background: #0f1115;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95em;
+            transition: var(--transition);
+            width: 100%;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        input::placeholder, textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Buttons */
+        button {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: var(--radius-sm);
+            padding: 10px 20px;
+            border: none;
+        }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-1px); }
+        
+        .btn-secondary { background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-secondary:hover:not(:disabled) { background: var(--surface-hover); border-color: var(--border-highlight); transform: translateY(-1px); }
+        
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .btn-danger:hover:not(:disabled) { background: var(--danger); color: white; }
+        
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover:not(:disabled) { background: #34d399; transform: translateY(-1px); }
 
         /* Project Selector */
         .project-selector {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        .project-selector select { flex: 1 1 auto; min-width: 150px; }
+        .project-selector label { font-size: 0.9em; color: var(--text-secondary); white-space: nowrap; }
+
+        /* Task Cards */
+        .task-card { 
+            background: var(--surface); 
+            padding: 18px; 
+            margin-bottom: 15px; 
+            border-radius: var(--radius); 
+            box-shadow: var(--shadow); 
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .task-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-highlight);
+            box-shadow: var(--shadow-lg);
+        }
+        .task-card-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; row-gap: 4px; }
+        .task-title-group { display: flex; align-items: flex-start; gap: 10px; flex: 1 1 auto; min-width: 0; }
+        .task-title-group > input[type="checkbox"] { flex-shrink: 0; margin-top: 4px; accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
+        .task-title-group > .expand-toggle { flex-shrink: 0; margin-top: 2px; }
+        
+        .completed { text-decoration: line-through; color: var(--text-muted); }
+        
+        /* Task description */
+        .task-description {
+            margin: 12px 0 10px 28px;
             padding: 10px 14px;
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-size: 0.88em;
+            color: var(--text-secondary);
+            background: #0f1115;
+            border-radius: var(--radius-sm);
+            border-left: 2px solid var(--border-highlight);
+            line-height: 1.5;
         }
-        .project-selector label {
-            font-weight: bold;
-            font-size: 0.9em;
-            color: #555;
-            white-space: nowrap;
-        }
-        .project-selector select {
-            flex: 1;
-            padding: 8px 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 0.95em;
-            background: #fafafa;
-            cursor: pointer;
-        }
+
+        .due-date-label { font-size: 0.8em; color: var(--text-muted); font-weight: normal; margin-left: 62px; white-space: nowrap; }
 
         /* Expand Toggle */
         .expand-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 0.85em;
-            color: #888;
+            background: transparent;
+            color: var(--text-muted);
             padding: 2px 6px;
-            margin-right: 6px;
-            transition: transform 0.2s ease;
-            display: inline-block;
+            font-size: 1em;
         }
-        .expand-toggle:hover { color: #333; }
+        .expand-toggle:hover { color: var(--text-primary); transform: scale(1.1); }
         .expand-toggle.expanded { transform: rotate(90deg); }
 
         /* Subtask List */
         .subtask-list {
-            margin-top: 10px;
-            margin-left: 28px;
-            padding: 8px 0 4px 12px;
-            border-left: 3px solid #e0e0e0;
+            margin-top: 12px;
+            margin-left: 32px;
+            padding: 0 0 0 16px;
+            border-left: 2px solid var(--border);
             overflow: hidden;
-            transition: max-height 0.3s ease, opacity 0.3s ease;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
         }
-        .subtask-list.collapsed {
-            max-height: 0;
-            opacity: 0;
-            margin-top: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-        }
-        .subtask-list.expanded-list {
-            max-height: 1000px;
-            opacity: 1;
-        }
+        .subtask-list.collapsed { max-height: 0; opacity: 0; margin-top: 0; }
+        .subtask-list.expanded-list { max-height: 1500px; opacity: 1; }
+        
         .subtask-item {
             display: flex;
             align-items: center;
-            padding: 5px 0;
-            font-size: 0.92em;
-            color: #555;
+            padding: 6px 0;
+            font-size: 0.9em;
+            color: var(--text-secondary);
         }
-        .subtask-item input[type="checkbox"] {
-            margin-right: 8px;
-            cursor: pointer;
-        }
-        .subtask-item .subtask-title-completed {
-            text-decoration: line-through;
-            color: #aaa;
-        }
-
-        /* Task description */
-        .task-description {
-            margin: 8px 0 6px 28px;
-            padding: 6px 10px;
-            font-size: 0.88em;
-            color: #666;
-            background: #fafafa;
-            border-radius: 4px;
-            border-left: 3px solid #ccc;
-            line-height: 1.4;
-        }
+        .subtask-item input[type="checkbox"] { margin-right: 12px; accent-color: var(--primary); width: 16px; height: 16px; }
+        .subtask-item .subtask-title-completed { text-decoration: line-through; color: var(--text-muted); }
 
         /* Add subtask input */
         .add-subtask-form {
             display: flex;
-            gap: 6px;
-            margin-top: 6px;
-            padding-top: 6px;
-            border-top: 1px dashed #e0e0e0;
+            gap: 10px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border);
         }
-        .add-subtask-form input {
-            flex: 1;
-            padding: 5px 8px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            font-size: 0.88em;
-        }
-        .add-subtask-form button {
-            padding: 5px 10px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            font-size: 0.82em;
-            cursor: pointer;
-        }
+        .add-subtask-form button { padding: 8px 12px; font-size: 0.85em; }
 
         /* Ticket type badge */
         .ticket-badge {
             display: inline-block;
             font-size: 0.7em;
-            font-weight: bold;
-            padding: 2px 7px;
-            border-radius: 3px;
-            margin-left: 8px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            vertical-align: middle;
         }
-        .ticket-badge.bug { background: #fce4ec; color: #c62828; }
-        .ticket-badge.feature { background: #e8f5e9; color: #2e7d32; }
-        .ticket-badge.chore { background: #fff3e0; color: #e65100; }
+        .ticket-badge.bug { background: var(--bug-bg); color: var(--bug-text); }
+        .ticket-badge.feature { background: var(--feature-bg); color: var(--feature-text); }
+        .ticket-badge.chore { background: var(--chore-bg); color: var(--chore-text); }
 
-        /* Modal Styles */
+        /* Modals */
         dialog {
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            padding: 20px;
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 24px;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
+            margin: auto;
         }
-        dialog::backdrop {
-            background: rgba(0,0,0,0.4);
+        dialog::backdrop { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(3px); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .close-btn { color: var(--text-muted); font-size: 1.5em; padding: 0; }
+        .close-btn:hover { color: var(--text-primary); background: transparent; transform: scale(1.1); }
+        
+        .form-group { margin-bottom: 18px; display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-size: 0.9em; font-weight: 500; color: var(--text-secondary); }
+        
+        /* AI Panel */
+        .ai-panel {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
         }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+        .ai-panel .btn-primary {
+            background: #6366f1; /* Purple-blue for AI */
         }
-        .modal-header h3 { margin: 0; }
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            cursor: pointer;
-            color: #888;
+        .ai-panel .btn-primary:hover:not(:disabled) {
+            background: #818cf8;
         }
-        .close-btn:hover { color: #333; }
-        .form-group {
-            margin-bottom: 15px;
+        
+        /* Add Form */
+        .add-task-form {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 12px;
         }
-        .form-group label {
-            font-size: 0.9em;
-            font-weight: bold;
-            color: #555;
-        }
-        .form-group input {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .btn-primary {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-        }
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-left: 10px;
+        .form-row { display: flex; gap: 12px; }
+        
+        #ast-content {
+            background: #0f1115 !important;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
         }
     </style>
 </head>
@@ -244,70 +339,74 @@
         </div>
         
     <div id="login-section" class="centered-content" style="display: none;">
-        <h2>Login</h2>
-        <form id="login-form" class="add-form">
+        <h2 style="text-align: center; margin-bottom: 20px;">Login</h2>
+        <form id="login-form" class="add-task-form">
             <input type="text" id="login-username" placeholder="Username" required>
             <input type="password" id="login-password" placeholder="Password" required>
-            <button type="submit">Login</button>
+            <button type="submit" class="btn-primary">Login</button>
         </form>
         <p id="login-error" style="color: red; display: none;">Invalid credentials.</p>
     </div>
 
     <div id="app-section" style="display: none;">
-        <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+        <div class="app-layout">
             <!-- Left Panel: Normal Tasks -->
-            <div style="flex: 1 1 300px;">
+            <div class="left-panel">
                 <!-- Project Selector -->
-                <div style="display: flex; gap: 10px; margin-bottom: 16px; align-items: center;">
-                    <div class="project-selector" style="flex: 1; margin-bottom: 0;">
-                        <label for="project-select">📂 Project:</label>
-                        <select id="project-select">
-                            <option value="all">All Tasks</option>
-                            <option value="none">Unassigned</option>
-                        </select>
-                    </div>
-                    <button id="view-ast-btn" class="btn-secondary" style="margin-left: 0; padding: 0 15px; white-space: nowrap; background: #17a2b8; display: none;">View AST</button>
-                    <button id="sync-repo-btn" class="btn-secondary" style="margin-left: 0; padding: 0 15px; white-space: nowrap; background: #ffc107; color: #333; display: none;">Sync Repo</button>
-                    <button id="delete-project-btn" class="btn-secondary" style="margin-left: 0; padding: 0 15px; white-space: nowrap; background: #dc3545; display: none;">🗑️</button>
-                    <button id="open-create-project-btn" class="btn-secondary" style="margin-left: 0; padding: 0 15px; white-space: nowrap;">+ New Project</button>
+                <div class="project-selector">
+                    <label for="project-select">📂 Project:</label>
+                    <select id="project-select">
+                        <option value="all">All Tasks</option>
+                        <option value="none">Unassigned</option>
+                    </select>
+                    
+                    <button id="view-ast-btn" class="btn-secondary" style="display: none;">View AST</button>
+                    <button id="sync-repo-btn" class="btn-secondary" style="display: none;">Sync Repo</button>
+                    <button id="delete-project-btn" class="btn-danger" style="display: none;">🗑️</button>
+                    <button id="open-create-project-btn" class="btn-primary">+ New Project</button>
                 </div>
 
-                <form id="add-task-form" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="task-title" placeholder="What needs to be done?" required style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                        <select id="task-type" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; background: white; cursor: pointer;">
+
+                <h3 style="margin-top: 20px;">Tasks</h3>
+                <div id="task-list">
+                    <p style="color: var(--text-muted); text-align: center; padding: 20px;">Loading tasks...</p>
+                </div>
+                <button id="logout-btn" class="btn-secondary" style="margin-top: 20px;">Logout</button>
+            </div>
+            
+            <!-- Right Panel: AI Tasks -->
+            <div class="right-panel">
+                <div class="ai-panel">
+                    <h3>✨ AI Task Generator</h3>
+                    <form id="ai-task-form" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div>
+                            <label for="ai-project-select" style="font-size: 0.85em; color: var(--text-secondary); margin-bottom: 5px; display: block;">📂 Target Project:</label>
+                            <select id="ai-project-select">
+                                <option value="none">No Project</option>
+                            </select>
+                        </div>
+                        <textarea id="ai-task-text" rows="5" placeholder="E.g., Add input validation to the signup form and write unit tests for the auth module." required style="resize: vertical;"></textarea>
+                        <button type="submit" class="btn-primary">Generate Tasks</button>
+                    </form>
+                    <p id="ai-task-status" style="margin-top: 12px; font-size: 0.9em; color: var(--text-secondary);"></p>
+                </div>
+                
+                <h3 style="margin-top: 20px;">Create Task</h3>
+                <form id="add-task-form" class="add-task-form">
+                    <div class="form-row">
+                        <input type="text" id="task-title" placeholder="What needs to be done?" required style="flex: 2;">
+                        <select id="task-type" style="flex: 1;">
                             <option value="feature">🟢 Feature</option>
                             <option value="bug">🔴 Bug</option>
                             <option value="chore">🟠 Chore</option>
                         </select>
                     </div>
-                    <textarea id="task-description" rows="2" placeholder="Description (optional)" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; font-family: sans-serif;"></textarea>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="datetime-local" id="task-due-date" style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                        <button type="submit" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Add Task</button>
+                    <textarea id="task-description" rows="2" placeholder="Description (optional)" style="resize: vertical;"></textarea>
+                    <div class="form-row">
+                        <input type="datetime-local" id="task-due-date" style="flex: 2;">
+                        <button type="submit" class="btn-success" style="flex: 1;">Add Task</button>
                     </div>
                 </form>
-                
-                <div id="task-list">
-                    <p>Loading tasks...</p>
-                </div>
-                <button id="logout-btn" style="margin-top: 20px;">Logout</button>
-            </div>
-            
-            <!-- Right Panel: AI Tasks -->
-            <div class="ai-panel" style="flex: 1 1 300px; background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <h3 style="margin-top: 0;">✨ AI Task Generator</h3>
-                <form id="ai-task-form" style="display: flex; flex-direction: column; gap: 10px;">
-                    <div class="project-selector" style="margin-bottom: 0; padding: 8px 10px;">
-                        <label for="ai-project-select" style="font-size: 0.85em;">📂 Project:</label>
-                        <select id="ai-project-select">
-                            <option value="none">No Project</option>
-                        </select>
-                    </div>
-                    <textarea id="ai-task-text" rows="5" placeholder="E.g., Add input validation to the signup form and write unit tests for the auth module." style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical;" required></textarea>
-                    <button type="submit" style="padding: 10px 20px; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer;">Generate Tasks</button>
-                </form>
-                <p id="ai-task-status" style="margin-top: 10px; font-size: 0.9em;"></p>
             </div>
         </div>
     </div>
@@ -330,10 +429,10 @@
             <div class="form-group">
                 <label for="project-token">GitHub Token (Optional)</label>
                 <input type="password" id="project-token" placeholder="Required only if repo is private">
-                <small style="color: #666; font-size: 0.8em;">Used for syncing repo AST. We recommend a fine-grained PAT.</small>
+                <small style="color: var(--text-muted); font-size: 0.8em;">Used for syncing repo AST. We recommend a fine-grained PAT.</small>
             </div>
-            <p id="project-error" style="color: red; display: none; font-size: 0.9em;"></p>
-            <button type="submit" class="btn-primary">Create Project</button>
+            <p id="project-error" style="color: var(--danger); display: none; font-size: 0.9em; margin-bottom: 15px;"></p>
+            <button type="submit" class="btn-primary" style="width: 100%;">Create Project</button>
         </form>
     </dialog>
 
@@ -343,7 +442,7 @@
             <h3>Project AST Outline</h3>
             <button class="close-btn" id="close-ast-modal">&times;</button>
         </div>
-        <pre id="ast-content" style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-family: monospace; font-size: 0.9em; white-space: pre-wrap; word-wrap: break-word; max-height: 60vh; overflow-y: auto;"></pre>
+        <pre id="ast-content" style="padding: 15px; border-radius: var(--radius-sm); overflow-x: auto; font-family: monospace; font-size: 0.9em; white-space: pre-wrap; word-wrap: break-word; max-height: 60vh; overflow-y: auto;"></pre>
     </dialog>
 
     <script>
@@ -729,7 +828,7 @@
         // Render Tasks
         function renderTasks(tasks) {
             if (tasks.length === 0) {
-                taskListEl.innerHTML = '<p>No tasks here! Rest up. 😎</p>';
+                taskListEl.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No tasks here! Rest up. 😎</p>';
                 return;
             }
             
@@ -744,8 +843,9 @@
                 const header = document.createElement('div');
                 header.className = 'task-card-header';
 
-                const leftSpan = document.createElement('span');
-                if (task.completed) leftSpan.className = 'completed';
+                const leftSpan = document.createElement('div');
+                leftSpan.className = 'task-title-group';
+                if (task.completed) leftSpan.classList.add('completed');
 
                 // Expand toggle (always shown so users can add subtasks)
                 const subtasks = task.subtasks || [];
@@ -766,37 +866,46 @@
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.checked = task.completed;
-                checkbox.style.marginRight = '10px';
                 checkbox.onclick = () => toggleTask(task);
+                leftSpan.appendChild(checkbox);
+
+                const textContentWrapper = document.createElement('div');
+                textContentWrapper.style.flex = '1 1 auto';
+                textContentWrapper.style.minWidth = '0';
+                textContentWrapper.style.wordBreak = 'break-word';
 
                 const strong = document.createElement('strong');
                 strong.textContent = task.title;
-
-                leftSpan.appendChild(checkbox);
-                leftSpan.appendChild(strong);
+                textContentWrapper.appendChild(strong);
 
                 // Ticket type badge
                 if (task.ticket_type) {
                     const badge = document.createElement('span');
                     badge.className = `ticket-badge ${task.ticket_type}`;
                     badge.textContent = task.ticket_type;
-                    leftSpan.appendChild(badge);
+                    badge.style.marginLeft = '8px';
+                    badge.style.verticalAlign = 'middle';
+                    textContentWrapper.appendChild(badge);
                 }
 
                 // Subtask count indicator
                 if (subtasks.length > 0) {
                     const doneCount = subtasks.filter(s => s.completed).length;
                     const countSpan = document.createElement('span');
-                    countSpan.style.cssText = 'font-size:0.75em;color:#888;margin-left:8px;';
+                    countSpan.style.cssText = 'font-size:0.75em;color:var(--text-muted);margin-left:8px;vertical-align:middle;';
                     countSpan.textContent = `(${doneCount}/${subtasks.length})`;
-                    leftSpan.appendChild(countSpan);
+                    textContentWrapper.appendChild(countSpan);
                 }
+                
+                leftSpan.appendChild(textContentWrapper);
 
                 // Right side: due date + delete
                 const rightContainer = document.createElement('div');
                 rightContainer.style.display = 'flex';
                 rightContainer.style.alignItems = 'center';
-                rightContainer.style.gap = '15px';
+                rightContainer.style.justifyContent = 'space-between';
+                rightContainer.style.width = '100%';
+                rightContainer.style.marginTop = '2px';
 
                 const dueDateSpan = document.createElement('span');
                 if (task.due_date) {
@@ -807,7 +916,7 @@
                     dueDateSpan.textContent = `${dateString} (${formatTimeLeft(task.due_date)})`;
                     
                     if (new Date(task.due_date) < new Date() && !task.completed) {
-                        dueDateSpan.style.color = '#dc3545';
+                        dueDateSpan.style.color = 'var(--danger)';
                         dueDateSpan.style.fontWeight = 'bold';
                     }
                 } else {
@@ -816,7 +925,7 @@
                 }
 
                 const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'delete-btn';
+                deleteBtn.className = 'btn-danger';
                 deleteBtn.textContent = 'Delete';
                 deleteBtn.onclick = () => deleteTask(task.id);
 
