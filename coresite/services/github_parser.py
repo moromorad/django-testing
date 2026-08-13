@@ -39,19 +39,26 @@ def fetch_repo_tree(github_repo: str, github_token: str = None) -> list:
     return code_files
 
 
-def fetch_file_content(github_repo: str, filepath: str) -> str:
+def fetch_file_content(github_repo: str, filepath: str, github_token: str = None) -> str:
     # Attempt to fetch from the 'main' branch first
     raw_url = f"https://raw.githubusercontent.com/{github_repo}/main/{filepath}"
     
+    req = urllib.request.Request(raw_url, headers={"User-Agent": "Django-Ticket-App"})
+    if github_token:
+        req.add_header('Authorization', f'Bearer {github_token}')
+        
     try:
-        with urllib.request.urlopen(raw_url) as response:
+        with urllib.request.urlopen(req) as response:
             return response.read().decode('utf-8')
     except urllib.error.HTTPError as e:
         # Fallback: Many older repositories still use 'master' instead of 'main'
         if e.code == 404:
             master_url = f"https://raw.githubusercontent.com/{github_repo}/master/{filepath}"
+            req_master = urllib.request.Request(master_url, headers={"User-Agent": "Django-Ticket-App"})
+            if github_token:
+                req_master.add_header('Authorization', f'Bearer {github_token}')
             try:
-                with urllib.request.urlopen(master_url) as response:
+                with urllib.request.urlopen(req_master) as response:
                     return response.read().decode('utf-8')
             except Exception:
                 pass
@@ -133,7 +140,7 @@ def sync_project_ast(project, github_token: str = None) -> str:
 
     # Cap at 30 files to prevent API rate limits and keep the LLM prompt reasonably sized
     for filepath in code_files[:30]:
-        code = fetch_file_content(project.github_repo, filepath)
+        code = fetch_file_content(project.github_repo, filepath, github_token)
         if not code:
             continue
             

@@ -66,10 +66,11 @@ def text_to_tasks(text: str, user_timezone: str = "UTC", ast_outline: str = None
         f"The user is in the timezone: {user_timezone}.\n"
         f"CURRENT DATE & TIME: {current_time_str}\n\n"
         f"CRITICAL RULES:\n"
-        f"1. You MUST write a technical summary in the `description` field.\n"
-        f"2. You MUST populate the `subtasks` array with step-by-step instructions. DO NOT leave it empty.\n"
-        f"3. Calculate deadlines from the CURRENT DATE and format strictly as an ISO 8601 string with the timezone offset (e.g., 'YYYY-MM-DDTHH:MM:SS+03:00').\n"
-        f"4. You must output EXACTLY ONE task object. Do not wrap it in a list or a 'tasks' dictionary.\n\n"
+        f"1. AST MAPPING: You MUST analyze the REPOSITORY OUTLINE. Assign your subtasks to specific, existing files in the outline whenever logically possible (e.g., put new API endpoints in the existing views file, put parsing logic in the existing parser file).\n"
+        f"2. You MUST write a technical summary in the `description` field.\n"
+        f"3. You MUST populate the `subtasks` array with step-by-step instructions. DO NOT leave it empty.\n"
+        f"4. Calculate deadlines from the CURRENT DATE and format strictly as an ISO 8601 string with the timezone offset (e.g., 'YYYY-MM-DDTHH:MM:SS+03:00').\n"
+        f"5. You must output EXACTLY ONE task object. Do not wrap it in a list or a 'tasks' dictionary.\n\n"
         f"OUTPUT EXACTLY IN THIS JSON FORMAT:\n"
         """{
           "title": "Add register_bulk_routes method",

@@ -40,5 +40,6 @@ htmlcov/
 ehthumbs.db
 Thumbs.db
 
-# Docker
-.dockerignore
+# IDEs
+.vscode/
+.idea/

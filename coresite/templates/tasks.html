@@ -268,6 +268,7 @@
                     </div>
                     <button id="view-ast-btn" class="btn-secondary" style="margin-left: 0; padding: 0 15px; white-space: nowrap; background: #17a2b8; display: none;">View AST</button>
                     <button id="sync-repo-btn" class="btn-secondary" style="margin-left: 0; padding: 0 15px; white-space: nowrap; background: #ffc107; color: #333; display: none;">Sync Repo</button>
+                    <button id="delete-project-btn" class="btn-secondary" style="margin-left: 0; padding: 0 15px; white-space: nowrap; background: #dc3545; display: none;">🗑️</button>
                     <button id="open-create-project-btn" class="btn-secondary" style="margin-left: 0; padding: 0 15px; white-space: nowrap;">+ New Project</button>
                 </div>
 
@@ -373,6 +374,7 @@
         const astModal = document.getElementById('ast-modal');
         const viewAstBtn = document.getElementById('view-ast-btn');
         const syncRepoBtn = document.getElementById('sync-repo-btn');
+        const deleteProjectBtn = document.getElementById('delete-project-btn');
         const closeAstModalBtn = document.getElementById('close-ast-modal');
         const astContent = document.getElementById('ast-content');
 
@@ -512,7 +514,48 @@
             } else {
                 syncRepoBtn.style.display = 'none';
             }
+            if (project) {
+                deleteProjectBtn.style.display = 'inline-block';
+            } else {
+                deleteProjectBtn.style.display = 'none';
+            }
         }
+
+        deleteProjectBtn.addEventListener('click', async () => {
+            const selectedId = projectSelect.value;
+            const project = allProjects.find(p => String(p.id) === selectedId);
+            if (!project) return;
+
+            const confirmDelete = confirm(`Are you sure you want to delete the project "${project.name}"?\n\nWARNING: This will permanently delete all tasks associated with this project. This action cannot be undone.`);
+            if (!confirmDelete) return;
+
+            try {
+                const response = await fetch(`${projectsApiUrl}${project.id}/`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+
+                if (response.ok) {
+                    // Revert to "All Tasks"
+                    projectSelect.value = 'all';
+                    localStorage.setItem('selected_project', 'all');
+                    if (aiProjectSelect.value === selectedId) {
+                        aiProjectSelect.value = 'none';
+                        localStorage.setItem('selected_ai_project', 'none');
+                    }
+                    
+                    await fetchProjects(); // Refresh dropdowns
+                    fetchTasks(); // Fetch tasks to remove deleted ones
+                } else if (response.status === 401) {
+                    logoutBtn.click();
+                } else {
+                    alert('Error deleting project.');
+                }
+            } catch (error) {
+                console.error("Error deleting project:", error);
+                alert("An error occurred while deleting.");
+            }
+        });
 
         syncRepoBtn.addEventListener('click', async () => {
             const selectedId = projectSelect.value;
