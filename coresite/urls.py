@@ -10,6 +10,7 @@ router.register(r'projects', ProjectViewSet, basename='project')
 urlpatterns = [
     path('', include(router.urls)),
     path('interface/', task_interface, name='task-ui'),
+    path('register/', RegisterView.as_view(), name='register'),
     path("users/", UserList.as_view()),
     path("users/<int:pk>/", UserDetail.as_view()),
 ]

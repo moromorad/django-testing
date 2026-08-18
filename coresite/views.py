@@ -1,29 +1,24 @@
 # pyrefly: ignore [missing-import]
-from rest_framework.decorators import action
-from typing import Optional, Any
-from django.http import HttpRequest, HttpResponse
-from rest_framework.request import Request
-from rest_framework.serializers import BaseSerializer
-from django.shortcuts import render
-from rest_framework import viewsets
-from .models import Project, Task, Weather
-from .serializers import ProjectSerializer, TaskSerializer
-from .services import utils
-
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-
+from typing import Optional
 
 from django.contrib.auth.models import User
-from .serializers import UserSerializer
-from rest_framework import generics
-
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.throttling import AnonRateThrottle
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
+from rest_framework import generics, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import Throttled
+from rest_framework.permissions import AllowAny
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.serializers import BaseSerializer
+from rest_framework.throttling import AnonRateThrottle
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-from schemas import TaskCreate, TaskCreateList
+from .models import Project, Task, Weather
+from .serializers import ProjectSerializer, RegisterSerializer, TaskSerializer, UserSerializer
+from .services import utils
 from .services.github_parser import sync_project_ast
 
 
@@ -76,10 +71,6 @@ class TaskViewSet(viewsets.ModelViewSet):
             
         return Response({"message": "Task created successfully"}, status=status.HTTP_201_CREATED)
         
-        
-
-    
-
 
 class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
@@ -117,7 +108,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    
+
 
 
 def task_interface(request: HttpRequest) -> HttpResponse:
@@ -140,7 +131,30 @@ def task_interface(request: HttpRequest) -> HttpResponse:
 
     return render(request, "tasks.html", {"weather": latest_weather, "temp_diff": diff, "abs_diff": abs_diff})
 
+class RegisterView(APIView):
+    authentication_classes = ()
+    permission_classes = [AllowAny]
+    throttle_classes = [LoginRateThrottle]
 
+    def post(self, request: Request) -> Response:
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            refresh = RefreshToken.for_user(user)
+            return Response(
+                {
+                    "message": "User registered successfully",
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh),
+                    "user": {
+                        "id": user.id,
+                        "username": user.username,
+                        "email": user.email,
+                    },
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()

@@ -307,6 +307,50 @@
             color: var(--text-secondary);
             border: 1px solid var(--border);
         }
+
+        /* Auth Tabs & Switcher */
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background: #0f1115;
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            border: 1px solid var(--border);
+            gap: 4px;
+        }
+        .auth-tab {
+            flex: 1;
+            padding: 8px 16px;
+            text-align: center;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .auth-tab.active {
+            background: var(--surface);
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .auth-error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid var(--danger);
+            color: #f87171;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.88em;
+            margin-top: 10px;
+            display: none;
+            text-align: left;
+        }
+        .auth-error ul {
+            margin: 0;
+            padding-left: 18px;
+        }
     </style>
 </head>
 <body>
@@ -338,14 +382,34 @@
             </div>
         </div>
         
-    <div id="login-section" class="centered-content" style="display: none;">
-        <h2 style="text-align: center; margin-bottom: 20px;">Login</h2>
-        <form id="login-form" class="add-task-form">
-            <input type="text" id="login-username" placeholder="Username" required>
-            <input type="password" id="login-password" placeholder="Password" required>
-            <button type="submit" class="btn-primary">Login</button>
-        </form>
-        <p id="login-error" style="color: red; display: none;">Invalid credentials.</p>
+    <div id="auth-section" class="centered-content" style="display: none;">
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tab-login-btn" type="button">Sign In</button>
+            <button class="auth-tab" id="tab-register-btn" type="button">Create Account</button>
+        </div>
+
+        <!-- Login Card -->
+        <div id="login-container">
+            <h2 style="text-align: center; margin-bottom: 20px;">Welcome Back</h2>
+            <form id="login-form" class="add-task-form">
+                <input type="text" id="login-username" placeholder="Username" required autocomplete="username">
+                <input type="password" id="login-password" placeholder="Password" required autocomplete="current-password">
+                <button type="submit" class="btn-primary">Sign In</button>
+            </form>
+            <div id="login-error" class="auth-error"></div>
+        </div>
+
+        <!-- Register Card -->
+        <div id="register-container" style="display: none;">
+            <h2 style="text-align: center; margin-bottom: 20px;">Create an Account</h2>
+            <form id="register-form" class="add-task-form">
+                <input type="text" id="register-username" placeholder="Username" required autocomplete="username">
+                <input type="email" id="register-email" placeholder="Email address (required)" required autocomplete="email">
+                <input type="password" id="register-password" placeholder="Password" required autocomplete="new-password">
+                <button type="submit" class="btn-primary">Create Account</button>
+            </form>
+            <div id="register-error" class="auth-error"></div>
+        </div>
     </div>
 
     <div id="app-section" style="display: none;">
@@ -449,11 +513,19 @@
         const apiBaseUrl = '/api/tasks/';
         const projectsApiUrl = '/api/projects/';
         const tokenUrl = '/api/token/';
+        const registerApiUrl = '/api/register/';
         
-        const loginSection = document.getElementById('login-section');
+        const authSection = document.getElementById('auth-section');
+        const loginContainer = document.getElementById('login-container');
+        const registerContainer = document.getElementById('register-container');
+        const tabLoginBtn = document.getElementById('tab-login-btn');
+        const tabRegisterBtn = document.getElementById('tab-register-btn');
+        
         const appSection = document.getElementById('app-section');
         const loginForm = document.getElementById('login-form');
         const loginError = document.getElementById('login-error');
+        const registerForm = document.getElementById('register-form');
+        const registerError = document.getElementById('register-error');
         
         const taskListEl = document.getElementById('task-list');
         const formEl = document.getElementById('add-task-form');
@@ -484,16 +556,57 @@
         let allTasks = [];
         let allProjects = [];
 
+        // Tab Switching
+        tabLoginBtn.addEventListener('click', () => {
+            tabLoginBtn.classList.add('active');
+            tabRegisterBtn.classList.remove('active');
+            loginContainer.style.display = 'block';
+            registerContainer.style.display = 'none';
+            loginError.style.display = 'none';
+            registerError.style.display = 'none';
+        });
+
+        tabRegisterBtn.addEventListener('click', () => {
+            tabRegisterBtn.classList.add('active');
+            tabLoginBtn.classList.remove('active');
+            loginContainer.style.display = 'none';
+            registerContainer.style.display = 'block';
+            loginError.style.display = 'none';
+            registerError.style.display = 'none';
+        });
+
+        // Helper to format error objects from DRF
+        function renderApiErrors(errorContainer, errorData) {
+            errorContainer.innerHTML = '';
+            if (typeof errorData === 'string') {
+                errorContainer.textContent = errorData;
+            } else if (errorData.detail) {
+                errorContainer.textContent = errorData.detail;
+            } else {
+                const ul = document.createElement('ul');
+                for (const [field, messages] of Object.entries(errorData)) {
+                    const msgList = Array.isArray(messages) ? messages : [messages];
+                    msgList.forEach(msg => {
+                        const li = document.createElement('li');
+                        li.textContent = `${field}: ${msg}`;
+                        ul.appendChild(li);
+                    });
+                }
+                errorContainer.appendChild(ul);
+            }
+            errorContainer.style.display = 'block';
+        }
+
         // Check if user is logged in
         function checkAuth() {
             const token = localStorage.getItem('access_token');
             if (token) {
-                loginSection.style.display = 'none';
+                authSection.style.display = 'none';
                 appSection.style.display = 'block';
                 fetchProjects();
                 fetchTasks();
             } else {
-                loginSection.style.display = 'block';
+                authSection.style.display = 'block';
                 appSection.style.display = 'none';
             }
         }
@@ -503,6 +616,7 @@
             e.preventDefault();
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
+            loginError.style.display = 'none';
 
             try {
                 const response = await fetch(tokenUrl, {
@@ -511,24 +625,58 @@
                     body: JSON.stringify({ username, password })
                 });
 
+                const data = await response.json();
+
                 if (response.ok) {
-                    const data = await response.json();
                     localStorage.setItem('access_token', data.access);
                     localStorage.setItem('refresh_token', data.refresh);
-                    loginError.style.display = 'none';
+                    loginForm.reset();
                     checkAuth();
                 } else if (response.status === 429) {
-                    const errorData = await response.json();
-                    loginError.textContent = errorData.detail;
+                    loginError.textContent = data.detail || "Too many failed attempts. Try again later.";
                     loginError.style.display = 'block';
                 } else {
-                    loginError.textContent = "Invalid credentials.";
+                    loginError.textContent = data.detail || "Invalid username or password.";
                     loginError.style.display = 'block';
                 }
             } catch (error) {
                 console.error("Login error:", error);
-                loginError.textContent = "An error occurred.";
+                loginError.textContent = "An error occurred during login.";
                 loginError.style.display = 'block';
+            }
+        });
+
+        // Handle Register
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+
+            registerError.style.display = 'none';
+
+            try {
+                const response = await fetch(registerApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Auto-login: Store JWT tokens returned by API
+                    localStorage.setItem('access_token', data.access);
+                    localStorage.setItem('refresh_token', data.refresh);
+                    registerForm.reset();
+                    checkAuth();
+                } else {
+                    renderApiErrors(registerError, data);
+                }
+            } catch (error) {
+                console.error("Registration error:", error);
+                registerError.textContent = "An error occurred during registration. Please try again.";
+                registerError.style.display = 'block';
             }
         });
 
